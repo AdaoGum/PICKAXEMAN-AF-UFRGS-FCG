@@ -258,6 +258,8 @@ return;
 Agora vamos fazer a picareta se mexer
 
  Variáveis para animação da picareta
+ 
+ ```cpp
 bool g_IsSwinging = false;         // Controla se a animação está ativa
 float g_SwingAnimationTime = 0.0f; // Controla o progresso da animação (em radianos)
 
@@ -274,11 +276,19 @@ Apertar o botão de animação da picareta
             g_SwingAnimationTime = 0.0f; // Reseta o tempo da animação
         }
     }
+```
+
 
 Inicializa o timer da animação antes do loop
+
+ ```cpp
 g_LastFrameTime = (float)glfwGetTime();
+```
+
 
 Cálculo da animação e movimento da animação
+
+ ```cpp
       float currentFrameTime = (float)glfwGetTime();
         g_DeltaTime = currentFrameTime - g_LastFrameTime;
         g_LastFrameTime = currentFrameTime;
@@ -296,8 +306,11 @@ Cálculo da animação e movimento da animação
                 g_SwingAnimationTime = 0.0f;
             }
         }
+ ```
 
 Usamos g_DeltaTime para velocidade constante
+
+ ```cpp
 float camera_speed = 4.0f * g_DeltaTime; // 4.0 unidades por segundo
 
 Cálculo da rotação da animação
@@ -309,5 +322,6 @@ Cálculo da rotação da animação
             }
             // Criamos uma matriz de rotação para a animação (em torno do eixo X)
             glm::mat4 animation_rotation = Matrix_Rotate_X(swing_angle_rad);
+```
 
 Multiplicamos nos modelos da cabeça e do cabo da picareta
