@@ -122,27 +122,14 @@ glm::vec4 g_CameraUpVector     = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f); // Vetor "up
 float g_CameraYaw   = -90.0f; // Yaw é rotação em torno do eixo Y. -90 graus para apontar para -Z.
 float g_CameraPitch = 0.0f;   // Pitch é rotação em torno do eixo X.
 
-// Velocidade de movimento da câmera
-float g_CameraSpeed = 0.1f;
-
-// Enumeração para os modos de câmera
-enum class CameraMode {
-    FREE,
-    LOOK_AT
-};
-
-// Variável que controla o tipo de câmera utilizada
-CameraMode g_CameraMode = CameraMode::FREE;
-
-// Variável que controla se projeção perspectiva está sendo usada
-bool g_UsePerspectiveProjection = true;
-
-// Variáveis para controle de movimento baseado em tempo
+// Variáveis para controle de movimento
 bool g_W_pressed = false;
 bool g_S_pressed = false;
 bool g_A_pressed = false;
 bool g_D_pressed = false;
-double g_LastFrameTime = 0.0;
+
+// Variável que controla o tipo de projeção utilizada: perspectiva ou ortográfica.
+bool g_UsePerspectiveProjection = true;
 
 // Variável que controla se o texto informativo será mostrado na tela.
 bool g_ShowInfoText = true;
@@ -1287,49 +1274,78 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 // tecla do teclado. Veja http://www.glfw.org/docs/latest/input_guide.html#input_key
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
 {
-    // Herança dos labas, remoer no futuro
-    // // =======================
-    // // Não modifique este loop! Ele é utilizando para correção automatizada dos
-    // // laboratórios. Deve ser sempre o primeiro comando desta função KeyCallback().
-    // for (int i = 0; i < 10; ++i)
-    //     if (key == GLFW_KEY_0 + i && action == GLFW_PRESS && mod == GLFW_MOD_SHIFT)
-    //         std::exit(100 + i);
-    // // =======================
+    // =======================
+    // Não modifique este loop! Ele é utilizando para correção automatizada dos
+    // laboratórios. Deve ser sempre o primeiro comando desta função KeyCallback().
+    for (int i = 0; i < 10; ++i)
+        if (key == GLFW_KEY_0 + i && action == GLFW_PRESS && mod == GLFW_MOD_SHIFT)
+            std::exit(100 + i);
+    // =======================
 
     // Se o usuário pressionar a tecla ESC, fechamos a janela.
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
 
-    // Se o usuário apertar a tecla 'C', trocamos o modo de câmera.
-    if (key == GLFW_KEY_C && action == GLFW_PRESS)
+    // O código abaixo implementa a seguinte lógica:
+    //   Se apertar tecla X       então g_AngleX += delta;
+    //   Se apertar tecla shift+X então g_AngleX -= delta;
+    //   Se apertar tecla Y       então g_AngleY += delta;
+    //   Se apertar tecla shift+Y então g_AngleY -= delta;
+    //   Se apertar tecla Z       então g_AngleZ += delta;
+    //   Se apertar tecla shift+Z então g_AngleZ -= delta;
+
+
+
+    float delta = 3.141592 / 16; // 22.5 graus, em radianos.
+
+    if (key == GLFW_KEY_X && action == GLFW_PRESS)
     {
-        g_CameraMode = (g_CameraMode == CameraMode::FREE) ? CameraMode::LOOK_AT : CameraMode::FREE;
+        g_AngleX += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
     }
 
-    // Vetor que aponta para a direita
-    glm::vec4 camera_right_vector = crossproduct(g_CameraViewVector, g_CameraUpVector);
-
-    // Vetor de movimento horizontal (ignora a componente Y da direção da câmera)
-    glm::vec4 move_direction = g_CameraViewVector;
-    move_direction.y = 0.0f;
-    move_direction = move_direction / norm(move_direction); // Normaliza para manter a velocidade constante
-
-    // Se o usuário pressionar a tecla 'W', movemos a câmera para frente
-    if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
+    if (key == GLFW_KEY_Y && action == GLFW_PRESS)
     {
-        g_CameraPosition += g_CameraSpeed * move_direction;
+        g_AngleY += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
+    }
+    if (key == GLFW_KEY_Z && action == GLFW_PRESS)
+    {
+        g_AngleZ += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
     }
 
-    // Se o usuário pressionar a tecla 'S', movemos a câmera para trás
-    if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
+    // Se o usuário apertar a tecla espaço, resetamos os ângulos de Euler para zero.
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
     {
-        g_CameraPosition -= g_CameraSpeed * move_direction;
+        g_AngleX = 0.0f;
+        g_AngleY = 0.0f;
+        g_AngleZ = 0.0f;
+    }
+
+    // Se o usuário apertar a tecla P, utilizamos projeção perspectiva.
+    if (key == GLFW_KEY_P && action == GLFW_PRESS)
+    {
+        g_UsePerspectiveProjection = true;
+    }
+
+    // Se o usuário apertar a tecla O, utilizamos projeção ortográfica.
+    if (key == GLFW_KEY_O && action == GLFW_PRESS)
+    {
+        g_UsePerspectiveProjection = false;
     }
 
     // Se o usuário apertar a tecla H, fazemos um "toggle" do texto informativo mostrado na tela.
     if (key == GLFW_KEY_H && action == GLFW_PRESS)
     {
         g_ShowInfoText = !g_ShowInfoText;
+    }
+
+    // Só começa uma nova animação se não houver uma em andamento
+    if (key == GLFW_KEY_Q && action == GLFW_PRESS)
+    {
+        if (!g_IsSwinging)
+        {
+            g_IsSwinging = true;
+            g_SwingAnimationTime = 0.0f; // Reseta o tempo da animação
+        }
     }
 
     if (key == GLFW_KEY_W)
@@ -1340,11 +1356,30 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
             g_W_pressed = false;
     }
 
-    // Se o usuário pressionar a tecla 'D', movemos a câmera para direita
-    if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
+    if (key == GLFW_KEY_S)
     {
-        g_CameraPosition += g_CameraSpeed * camera_right_vector;
+        if (action == GLFW_PRESS)
+            g_S_pressed = true;
+        if (action == GLFW_RELEASE)
+            g_S_pressed = false;
     }
+
+    if (key == GLFW_KEY_A)
+    {
+        if (action == GLFW_PRESS)
+            g_A_pressed = true;
+        if (action == GLFW_RELEASE)
+            g_A_pressed = false;
+    }
+
+    if (key == GLFW_KEY_D)
+    {
+        if (action == GLFW_PRESS)
+            g_D_pressed = true;
+        if (action == GLFW_RELEASE)
+            g_D_pressed = false;
+    }
+
 
 
 }
@@ -1485,4 +1520,3 @@ void TextRendering_ShowFramesPerSecond(GLFWwindow* window)
 
 // set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null
 // vim: set spell spelllang=pt_br :
-
