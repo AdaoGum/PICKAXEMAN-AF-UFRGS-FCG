@@ -137,6 +137,68 @@ bool g_ShowInfoText = true;
 // Variáveis que definem um programa de GPU (shaders). Veja função LoadShadersFromFiles().
 GLuint g_GpuProgramID = 0;
 
+// Variáveis para animação da picareta
+bool g_IsSwinging = false;         // Controla se a animação está ativa
+float g_SwingAnimationTime = 0.0f; // Controla o progresso da animação (em radianos)
+
+// Para animação e física independentes de framerate
+float g_DeltaTime = 0.0f;
+float g_LastFrameTime = 0.0f;
+
+const int map_width = 10;
+const int map_height = 10;
+int maze_map[map_height][map_width] = {
+    {1,1,1,1,1,1,1,1,1,1},
+    {1,0,0,0,0,0,0,0,0,1},
+    {1,0,1,1,0,1,1,1,0,1},
+    {1,0,1,0,0,0,1,0,0,1},
+    {1,0,1,0,1,0,1,0,1,1},
+    {1,0,0,0,1,0,0,0,0,1},
+    {1,1,1,1,1,0,1,1,0,1},
+    {1,0,0,0,0,0,0,1,0,1},
+    {1,0,1,1,1,1,0,0,0,1},
+    {1,1,1,1,1,1,1,1,1,1}
+};
+
+// Função para detectar colisão com as paredes
+bool CheckCollision(float x, float z)
+{
+    // Raio do corpo do personagem
+    float collision_radius = 0.2f; 
+
+    // Precisamos verificar uma pequena área ao redor do ponto para evitar atravessar
+    // Verificamos 4 pontos ao redor da posição (frente, trás, esquerda, direita)
+    float check_points[4][2] = {
+        { x + collision_radius, z },
+        { x - collision_radius, z },
+        { x, z + collision_radius },
+        { x, z - collision_radius }
+    };
+
+    for (int i = 0; i < 4; i++)
+    {
+        float px = check_points[i][0];
+        float pz = check_points[i][1];
+
+        // Conversão de Coordenada de Mundo para Índice da Matriz
+        // Inverso da lógica usada no desenho: pos_x = x - width/2
+        // Logo: grid_x = world_x + width/2
+        // O +0.5f é para arredondar para o índice inteiro correto
+        int grid_x = (int)(px + (float)map_width / 2.0f + 0.5f);
+        int grid_z = (int)(pz + (float)map_height / 2.0f + 0.5f);
+
+        // Verifica se está dentro dos limites do mapa
+        if (grid_x >= 0 && grid_x < map_width && grid_z >= 0 && grid_z < map_height)
+        {
+            // Se for 1, é parede!
+            if (maze_map[grid_z][grid_x] == 1)
+                return true;
+        }
+    }
+    return false;
+}
+
+
 int main()
 {
     // Inicializamos a biblioteca GLFW, utilizada para criar uma janela do
@@ -190,6 +252,8 @@ int main()
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
     glfwSetWindowSize(window, 800, 800); // Forçamos a chamada do callback acima, para definir g_ScreenRatio.
 
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     // Indicamos que as chamadas OpenGL deverão renderizar nesta janela
     glfwMakeContextCurrent(window);
 
@@ -233,27 +297,38 @@ int main()
     glm::mat4 the_model;
     glm::mat4 the_view;
 
-    // 0 = espaço vazio, 1 = parede (cubo)
-    const int map_width = 10;
-    const int map_height = 10;
-    int maze_map[map_height][map_width] = {
-        {1,1,1,1,1,1,1,1,1,1},
-        {1,0,0,0,0,0,0,0,0,1},
-        {1,0,1,1,0,1,1,1,0,1},
-        {1,0,1,0,0,0,1,0,0,1},
-        {1,0,1,0,1,0,1,0,1,1},
-        {1,0,0,0,1,0,0,0,0,1},
-        {1,1,1,1,1,0,1,1,0,1},
-        {1,0,0,0,0,0,0,1,0,1},
-        {1,0,1,1,1,1,0,0,0,1},
-        {1,1,1,1,1,1,1,1,1,1}
-    };
+    
+
+    // Inicializa o g_LastFrameTime antes do loop
+    g_LastFrameTime = (float)glfwGetTime();
 
 
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
+
+        // Cálculo do Delta Time
+        float currentFrameTime = (float)glfwGetTime();
+        g_DeltaTime = currentFrameTime - g_LastFrameTime;
+        g_LastFrameTime = currentFrameTime;
+
+        // Atualização da Animação
+        if (g_IsSwinging)
+        {
+            float swing_speed = 10.0f; // Velocidade da animação (radianos/seg)
+            g_SwingAnimationTime += swing_speed * g_DeltaTime;
+
+            // Usamos PI (3.141592) porque a função sin(x) de 0 a PI
+            // faz um movimento de "ida e volta" (0 -> 1 -> 0).
+            if (g_SwingAnimationTime >= 3.141592f)
+            {
+                g_IsSwinging = false;
+                g_SwingAnimationTime = 0.0f;
+            }
+        }
+
+
         // Aqui executamos as operações de renderização
 
         // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
@@ -301,19 +376,51 @@ int main()
         */
 
         //Lógica para camera livre
-        float camera_speed = 2.0f * 0.016f;
-        if (g_W_pressed)
-            g_CameraPosition += camera_speed * g_CameraViewVector;
-        if (g_S_pressed)
-            g_CameraPosition -= camera_speed * g_CameraViewVector;
+        //float camera_speed = 2.0f * 0.016f;
+        //Usamos g_DeltaTime para velocidade constante
+        float move_speed = 4.0f * g_DeltaTime;
 
-        // Vetor "right" da câmera
-        glm::vec4 camera_right_vector = crossproduct(g_CameraViewVector, g_CameraUpVector);
+        // Calcular vetores de direção SEM componente Y
+        glm::vec4 forward_vector = glm::vec4(g_CameraViewVector.x, 0.0f, g_CameraViewVector.z, 0.0f);
+        if (length(forward_vector) > 0.0f) // Evita divisão por zero
+            forward_vector = normalize(forward_vector);
+        
+        // Vetor Direita (Right) - Já é paralelo ao chão geralmente, mas garantimos
+        glm::vec4 right_vector = crossproduct(forward_vector, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
 
-        if (g_D_pressed)
-            g_CameraPosition += camera_speed * camera_right_vector;
-        if (g_A_pressed)
-            g_CameraPosition -= camera_speed * camera_right_vector;
+        // Acumular a intenção de movimento
+        glm::vec4 intended_movement = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+
+        if (g_W_pressed) intended_movement += forward_vector;
+        if (g_S_pressed) intended_movement -= forward_vector;
+        if (g_D_pressed) intended_movement += right_vector;
+        if (g_A_pressed) intended_movement -= right_vector;
+
+        // Se houver movimento, aplicamos com verificação de colisão
+        if (length(intended_movement) > 0.0f)
+        {
+            // Normaliza para que andar na diagonal não seja mais rápido
+            intended_movement = normalize(intended_movement) * move_speed;
+
+            // Tentativa de movimento no eixo X
+            float new_x = g_CameraPosition.x + intended_movement.x;
+            if (!CheckCollision(new_x, g_CameraPosition.z))
+            {
+                g_CameraPosition.x = new_x;
+            }
+
+            // Tentativa de movimento no eixo Z
+            float new_z = g_CameraPosition.z + intended_movement.z;
+            if (!CheckCollision(g_CameraPosition.x, new_z))
+            {
+                g_CameraPosition.z = new_z;
+            }
+            
+            // Forçamos Y a ser sempre 0.0 (altura dos olhos ajustada se necessário)
+            // Se quiser que a câmera fique na altura de uma pessoa (ex: 0.0 é o chão), 
+            // você pode somar uma constante na View Matrix ou manter g_CameraPosition.y fixo aqui.
+            g_CameraPosition.y = 0.0f; 
+        }
 
         glm::mat4 view = Matrix_Camera_View(g_CameraPosition, g_CameraViewVector, g_CameraUpVector);
 
@@ -357,7 +464,7 @@ int main()
         the_projection = projection;
         the_view = view;
 
-        // MODIFICAÇÃO: Desenha o chão
+        // Desenha o chão
         {
             glm::mat4 model = Matrix_Identity();
             the_model = model; // Salva para o texto
@@ -373,7 +480,7 @@ int main()
             );
         }
 
-        // MODIFICAÇÃO: Desenha o labirinto com base no maze_map
+        // Desenha o labirinto com base no maze_map
         // (Substitui o loop for (int i = 1; i <= 3; ++i))
         for (int z = 0; z < map_height; ++z)
         {
@@ -448,6 +555,7 @@ int main()
             (void*)g_VirtualScene["axes"].first_index
         );
 
+        // Desenha a picareta fixo na câmera
         {
             // Limpa o Z-buffer para garantir que a picareta sempre apareça na frente
             glClear(GL_DEPTH_BUFFER_BIT);
@@ -456,8 +564,24 @@ int main()
             glm::mat4 pickaxe_view = Matrix_Identity();
             glUniformMatrix4fv(view_uniform, 1, GL_FALSE, glm::value_ptr(pickaxe_view));
 
+
+            // Calcular a rotação da animação
+            float swing_angle_rad = 0.0f;
+            if (g_IsSwinging)
+            {
+                // sin(0) = 0, sin(pi/2) = 1, sin(pi) = 0.
+                // Isso dá um movimento suave de "ida e volta".
+                // Multiplicamos por um ângulo máximo (ex: 45 graus)
+                float max_swing_angle = glm::radians(-90.0f);
+                swing_angle_rad = sin(g_SwingAnimationTime) * max_swing_angle;
+            }
+            // Criamos uma matriz de rotação para a animação (em torno do eixo X)
+            glm::mat4 animation_rotation = Matrix_Rotate_X(swing_angle_rad);
+
             // Modelo do Cabo da Picareta
             glm::mat4 handle_model = Matrix_Translate(0.4f, -0.3f, -1.0f) // Posição na tela
+                                   * animation_rotation // Animação
+                                   * Matrix_Rotate_Y(glm::radians(90.0f))
                                    * Matrix_Rotate_Z(glm::radians(-30.0f)) // Rotação
                                    * Matrix_Scale(0.08f, 0.6f, 0.08f);    // Tamanho (fino e longo)
 
@@ -482,9 +606,11 @@ int main()
 
             // Modelo da Cabeça da Picareta
             glm::mat4 head_model = Matrix_Translate(0.4f, -0.3f, -1.0f)      // Mesma Posição
+                                 * animation_rotation // Animação
+                                 * Matrix_Rotate_Y(glm::radians(90.0f))
                                  * Matrix_Rotate_Z(glm::radians(-30.0f))    // Mesma Rotação
                                  * Matrix_Translate(0.0f, 0.25f, 0.0f)      // Desloca para a ponta do cabo
-                                 * Matrix_Scale(0.3f, 0.08f, 0.08f);       // Tamanho (largo e fino)
+                                 * Matrix_Scale(0.8f, 0.08f, 0.03f);       // Tamanho (largo e fino)
 
             glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(head_model));
 
@@ -1061,12 +1187,21 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
     // parâmetros que definem a posição da câmera dentro da cena virtual.
     // Assim, temos que o usuário consegue controlar a câmera.
 
-    if (!g_LeftMouseButtonPressed)
+    //if (!g_LeftMouseButtonPressed)
+    //{
+    //    // Mesmo sem pressionar, atualiza a última posição para evitar saltos
+    //    glfwGetCursorPos(window, &g_LastCursorPosX, &g_LastCursorPosY);
+    //    return;
+    //}
+
+    static bool firstMouse = true;
+    if (firstMouse)
     {
-        // Mesmo sem pressionar, atualiza a última posição para evitar saltos
-        glfwGetCursorPos(window, &g_LastCursorPosX, &g_LastCursorPosY);
-        return;
+        g_LastCursorPosX = xpos;
+        g_LastCursorPosY = ypos;
+        firstMouse = false;
     }
+
     // Deslocamento do cursor do mouse em x e y de coordenadas de tela!
     float dx = xpos - g_LastCursorPosX;
     float dy = ypos - g_LastCursorPosY;
@@ -1203,6 +1338,16 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         g_ShowInfoText = !g_ShowInfoText;
     }
 
+    // Só começa uma nova animação se não houver uma em andamento
+    if (key == GLFW_KEY_Q && action == GLFW_PRESS)
+    {
+        if (!g_IsSwinging)
+        {
+            g_IsSwinging = true;
+            g_SwingAnimationTime = 0.0f; // Reseta o tempo da animação
+        }
+    }
+
     if (key == GLFW_KEY_W)
     {
         if (action == GLFW_PRESS)
@@ -1234,6 +1379,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         if (action == GLFW_RELEASE)
             g_D_pressed = false;
     }
+
 
 
 }
