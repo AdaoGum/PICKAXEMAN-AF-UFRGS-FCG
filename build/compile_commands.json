@@ -7,6 +7,12 @@
 },
 {
   "directory": "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/build",
+  "command": "/usr/bin/g++  -I/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/include -g -std=c++11 -Wall -Wno-unused-function -o CMakeFiles/main.dir/src/collisions.cpp.o -c /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/collisions.cpp",
+  "file": "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/collisions.cpp",
+  "output": "CMakeFiles/main.dir/src/collisions.cpp.o"
+},
+{
+  "directory": "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/build",
   "command": "/usr/bin/g++  -I/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/include -g -std=c++11 -Wall -Wno-unused-function -o CMakeFiles/main.dir/src/textrendering.cpp.o -c /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/textrendering.cpp",
   "file": "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/textrendering.cpp",
   "output": "CMakeFiles/main.dir/src/textrendering.cpp.o"

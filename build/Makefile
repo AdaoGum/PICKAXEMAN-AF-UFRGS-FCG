@@ -142,6 +142,30 @@ run/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run.dir/build.make CMakeFiles/run.dir/build
 .PHONY : run/fast
 
+src/collisions.o: src/collisions.cpp.o
+.PHONY : src/collisions.o
+
+# target to build an object file
+src/collisions.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/collisions.cpp.o
+.PHONY : src/collisions.cpp.o
+
+src/collisions.i: src/collisions.cpp.i
+.PHONY : src/collisions.i
+
+# target to preprocess a source file
+src/collisions.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/collisions.cpp.i
+.PHONY : src/collisions.cpp.i
+
+src/collisions.s: src/collisions.cpp.s
+.PHONY : src/collisions.s
+
+# target to generate assembly for a file
+src/collisions.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/collisions.cpp.s
+.PHONY : src/collisions.cpp.s
+
 src/glad.o: src/glad.c.o
 .PHONY : src/glad.o
 
@@ -224,6 +248,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... run"
 	@echo "... main"
+	@echo "... src/collisions.o"
+	@echo "... src/collisions.i"
+	@echo "... src/collisions.s"
 	@echo "... src/glad.o"
 	@echo "... src/glad.i"
 	@echo "... src/glad.s"

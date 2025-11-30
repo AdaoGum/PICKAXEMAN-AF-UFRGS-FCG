@@ -83,10 +83,24 @@ CMakeFiles/main.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/main.cpp.s"
 	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/main.cpp -o CMakeFiles/main.dir/src/main.cpp.s
 
+CMakeFiles/main.dir/src/collisions.cpp.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/src/collisions.cpp.o: /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/collisions.cpp
+CMakeFiles/main.dir/src/collisions.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/main.dir/src/collisions.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/collisions.cpp.o -MF CMakeFiles/main.dir/src/collisions.cpp.o.d -o CMakeFiles/main.dir/src/collisions.cpp.o -c /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/collisions.cpp
+
+CMakeFiles/main.dir/src/collisions.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/collisions.cpp.i"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/collisions.cpp > CMakeFiles/main.dir/src/collisions.cpp.i
+
+CMakeFiles/main.dir/src/collisions.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/collisions.cpp.s"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/collisions.cpp -o CMakeFiles/main.dir/src/collisions.cpp.s
+
 CMakeFiles/main.dir/src/textrendering.cpp.o: CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/src/textrendering.cpp.o: /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/textrendering.cpp
 CMakeFiles/main.dir/src/textrendering.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/main.dir/src/textrendering.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/main.dir/src/textrendering.cpp.o"
 	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/textrendering.cpp.o -MF CMakeFiles/main.dir/src/textrendering.cpp.o.d -o CMakeFiles/main.dir/src/textrendering.cpp.o -c /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/textrendering.cpp
 
 CMakeFiles/main.dir/src/textrendering.cpp.i: cmake_force
@@ -100,7 +114,7 @@ CMakeFiles/main.dir/src/textrendering.cpp.s: cmake_force
 CMakeFiles/main.dir/src/glad.c.o: CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/src/glad.c.o: /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/glad.c
 CMakeFiles/main.dir/src/glad.c.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/main.dir/src/glad.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/main.dir/src/glad.c.o"
 	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main.dir/src/glad.c.o -MF CMakeFiles/main.dir/src/glad.c.o.d -o CMakeFiles/main.dir/src/glad.c.o -c /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/glad.c
 
 CMakeFiles/main.dir/src/glad.c.i: cmake_force
@@ -114,6 +128,7 @@ CMakeFiles/main.dir/src/glad.c.s: cmake_force
 # Object files for target main
 main_OBJECTS = \
 "CMakeFiles/main.dir/src/main.cpp.o" \
+"CMakeFiles/main.dir/src/collisions.cpp.o" \
 "CMakeFiles/main.dir/src/textrendering.cpp.o" \
 "CMakeFiles/main.dir/src/glad.c.o"
 
@@ -121,6 +136,7 @@ main_OBJECTS = \
 main_EXTERNAL_OBJECTS =
 
 /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/bin/Linux/main: CMakeFiles/main.dir/src/main.cpp.o
+/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/bin/Linux/main: CMakeFiles/main.dir/src/collisions.cpp.o
 /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/bin/Linux/main: CMakeFiles/main.dir/src/textrendering.cpp.o
 /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/bin/Linux/main: CMakeFiles/main.dir/src/glad.c.o
 /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/bin/Linux/main: CMakeFiles/main.dir/build.make
@@ -136,7 +152,7 @@ main_EXTERNAL_OBJECTS =
 /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/bin/Linux/main: /usr/lib/x86_64-linux-gnu/libXinerama.so
 /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/bin/Linux/main: /usr/lib/x86_64-linux-gnu/libXxf86vm.so
 /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/bin/Linux/main: CMakeFiles/main.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/bin/Linux/main"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/bin/Linux/main"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/main.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

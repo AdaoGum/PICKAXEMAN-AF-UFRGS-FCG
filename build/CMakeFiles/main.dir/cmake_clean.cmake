@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/bin/Linux/main"
   "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/bin/Linux/main.pdb"
+  "CMakeFiles/main.dir/src/collisions.cpp.o"
+  "CMakeFiles/main.dir/src/collisions.cpp.o.d"
   "CMakeFiles/main.dir/src/glad.c.o"
   "CMakeFiles/main.dir/src/glad.c.o.d"
   "CMakeFiles/main.dir/src/main.cpp.o"

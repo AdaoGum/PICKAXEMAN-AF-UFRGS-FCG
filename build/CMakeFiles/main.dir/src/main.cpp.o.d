@@ -164,7 +164,11 @@ CMakeFiles/main.dir/src/main.cpp.o: \
  /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h \
  /usr/include/c++/13/bits/fstream.tcc /usr/include/c++/13/sstream \
- /usr/include/c++/13/bits/sstream.tcc \
+ /usr/include/c++/13/bits/sstream.tcc /usr/include/c++/13/vector \
+ /usr/include/c++/13/bits/stl_uninitialized.h \
+ /usr/include/c++/13/bits/stl_vector.h \
+ /usr/include/c++/13/bits/stl_bvector.h \
+ /usr/include/c++/13/bits/vector.tcc \
  /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/include/glad/glad.h \
  /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/include/KHR/khrplatform.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
@@ -356,4 +360,23 @@ CMakeFiles/main.dir/src/main.cpp.o: \
  /usr/include/c++/13/cstring /usr/include/string.h /usr/include/strings.h \
  /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/include/glm/gtc/type_ptr.inl \
  /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/include/utils.h \
- /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/include/matrices.h
+ /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/include/matrices.h \
+ /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/include/collisions.h \
+ /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/include/tiny_obj_loader.h \
+ /usr/include/c++/13/set /usr/include/c++/13/bits/stl_set.h \
+ /usr/include/c++/13/bits/stl_multiset.h /usr/include/c++/13/utility \
+ /usr/include/c++/13/bits/stl_relops.h \
+ /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/include/stb_image.h \
+ /usr/include/c++/13/stdlib.h \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/limits.h \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/syslimits.h \
+ /usr/include/limits.h /usr/include/x86_64-linux-gnu/bits/posix1_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/local_lim.h \
+ /usr/include/linux/limits.h \
+ /usr/include/x86_64-linux-gnu/bits/posix2_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/xopen_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/uio_lim.h /usr/include/c++/13/math.h \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/emmintrin.h \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/xmmintrin.h \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/mmintrin.h \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/mm_malloc.h
