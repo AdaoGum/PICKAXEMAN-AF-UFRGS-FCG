@@ -8,9 +8,9 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/glad.c" "CMakeFiles/main.dir/src/glad.c.o" "gcc" "CMakeFiles/main.dir/src/glad.c.o.d"
-  "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/main.cpp" "CMakeFiles/main.dir/src/main.cpp.o" "gcc" "CMakeFiles/main.dir/src/main.cpp.o.d"
-  "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/textrendering.cpp" "CMakeFiles/main.dir/src/textrendering.cpp.o" "gcc" "CMakeFiles/main.dir/src/textrendering.cpp.o.d"
+  "C:/Users/AdaoJr/Documents/UFRGS/FCG - Fundamentos de Computacao Grafica/trabalho final git/PICKAXEMAN-AF-UFRGS-FCG/src/glad.c" "CMakeFiles/main.dir/src/glad.c.obj" "gcc" "CMakeFiles/main.dir/src/glad.c.obj.d"
+  "C:/Users/AdaoJr/Documents/UFRGS/FCG - Fundamentos de Computacao Grafica/trabalho final git/PICKAXEMAN-AF-UFRGS-FCG/src/main.cpp" "CMakeFiles/main.dir/src/main.cpp.obj" "gcc" "CMakeFiles/main.dir/src/main.cpp.obj.d"
+  "C:/Users/AdaoJr/Documents/UFRGS/FCG - Fundamentos de Computacao Grafica/trabalho final git/PICKAXEMAN-AF-UFRGS-FCG/src/textrendering.cpp" "CMakeFiles/main.dir/src/textrendering.cpp.obj" "gcc" "CMakeFiles/main.dir/src/textrendering.cpp.obj.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

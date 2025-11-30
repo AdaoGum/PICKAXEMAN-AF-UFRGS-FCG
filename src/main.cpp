@@ -145,20 +145,37 @@ float g_SwingAnimationTime = 0.0f; // Controla o progresso da animação (em rad
 float g_DeltaTime = 0.0f;
 float g_LastFrameTime = 0.0f;
 
+// Enum para os valores possíveis do mapa
+enum MapType
+{
+    EMPTY = 0,        // Vazio
+    WALL = 1,         // Parede sólida
+    DAMAGED_WALL = 2, // Parede danificada (batida uma vez)
+    DIAMOND = 3       // Diamante
+};
+
+// Tamanho do mapa
 const int map_width = 10;
 const int map_height = 10;
+// Mapa do labirinto. 0 = vazio, 1 = bloco de parede
 int maze_map[map_height][map_width] = {
-    {1,1,1,1,1,1,1,1,1,1},
-    {1,0,0,0,0,0,0,0,0,1},
-    {1,0,1,1,0,1,1,1,0,1},
-    {1,0,1,0,0,0,1,0,0,1},
-    {1,0,1,0,1,0,1,0,1,1},
-    {1,0,0,0,1,0,0,0,0,1},
-    {1,1,1,1,1,0,1,1,0,1},
-    {1,0,0,0,0,0,0,1,0,1},
-    {1,0,1,1,1,1,0,0,0,1},
-    {1,1,1,1,1,1,1,1,1,1}
+    {WALL,WALL,WALL,WALL,WALL,WALL,WALL,WALL,WALL,WALL},
+    {WALL,EMPTY,EMPTY,WALL,EMPTY,EMPTY,WALL,EMPTY,EMPTY,WALL},
+    {WALL,EMPTY,EMPTY,WALL,EMPTY,EMPTY,WALL,EMPTY,EMPTY,WALL},
+    {WALL,EMPTY,EMPTY,WALL,EMPTY,EMPTY,WALL,EMPTY,EMPTY,WALL},
+    {WALL,EMPTY,EMPTY,WALL,EMPTY,EMPTY,WALL,EMPTY,EMPTY,WALL},
+    {WALL,EMPTY,EMPTY,WALL,EMPTY,EMPTY,WALL,EMPTY,EMPTY,WALL},
+    {WALL,EMPTY,EMPTY,WALL,EMPTY,EMPTY,WALL,EMPTY,EMPTY,WALL},
+    {WALL,EMPTY,EMPTY,WALL,EMPTY,EMPTY,WALL,EMPTY,EMPTY,WALL},
+    {WALL,EMPTY,EMPTY,WALL,EMPTY,EMPTY,WALL,EMPTY,EMPTY,WALL},
+    {WALL,WALL,WALL,WALL,WALL,WALL,WALL,WALL,WALL,WALL}
 };
+
+// Contador para fazer o impacto da picareta na parede.
+// TODO: Duas maneiras de fazer o quebra parede.
+// Ou com o maze_map mudando de valor, acho que este é mais fácil.
+// Ou com o hit_wall_counts contando até 2 e aí removendo o cubo da parede.
+// int hit_wall_counts[map_height][map_width] = {0};
 
 // Função para detectar colisão com as paredes
 bool CheckCollision(float x, float z)
@@ -481,13 +498,12 @@ int main()
         }
 
         // Desenha o labirinto com base no maze_map
-        // (Substitui o loop for (int i = 1; i <= 3; ++i))
         for (int z = 0; z < map_height; ++z)
         {
             for (int x = 0; x < map_width; ++x)
             {
-                // Se for uma parede (1)
-                if (maze_map[z][x] == 1)
+                // Se for uma parede (WALL ou DAMAGED_WALL)
+                if (maze_map[z][x] == WALL || maze_map[z][x] == DAMAGED_WALL)
                 {
                     // Os cubos têm 1x1x1 (de -0.5 a 0.5).
                     // O chão está em y = -0.5.
@@ -503,17 +519,33 @@ int main()
 
                     // Envia a matriz "model" para a placa de vídeo (GPU).
                     glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-
+                    
                     // Desenha as faces coloridas
                     glUniform1i(render_as_black_uniform, false);
-                    glDrawElements(
-                        g_VirtualScene["cube_faces"].rendering_mode,
-                        g_VirtualScene["cube_faces"].num_indices,
-                        GL_UNSIGNED_INT,
-                        (void*)g_VirtualScene["cube_faces"].first_index
-                    );
 
-                    // Desenha as arestas pretas
+                    // Decide qual cubo desenhar
+                    if (maze_map[z][x] == DAMAGED_WALL)
+                    {
+                        // Desenha o cubo vermelho
+                        glDrawElements(
+                            g_VirtualScene["damaged_cube_faces"].rendering_mode,
+                            g_VirtualScene["damaged_cube_faces"].num_indices,
+                            GL_UNSIGNED_INT,
+                            (void*)g_VirtualScene["damaged_cube_faces"].first_index
+                        );
+                    }
+                    else // Se for WALL
+                    {
+                        // Desenha o cubo azul
+                        glDrawElements(
+                            g_VirtualScene["cube_faces"].rendering_mode,
+                            g_VirtualScene["cube_faces"].num_indices,
+                            GL_UNSIGNED_INT,
+                            (void*)g_VirtualScene["cube_faces"].first_index
+                        );
+                    }
+
+                    // Desenha as arestas pretas para ambos os cubos
                     glLineWidth(4.0f);
                     glUniform1i(render_as_black_uniform, true);
                     glDrawElements(
@@ -721,7 +753,17 @@ GLuint BuildTriangles()
       -50.0f, -0.5f, -50.0f, 1.0f, // vértice 14
        50.0f, -0.5f, -50.0f, 1.0f, // vértice 15
        50.0f, -0.5f,  50.0f, 1.0f, // vértice 16
-      -50.0f, -0.5f,  50.0f, 1.0f  // vértice 17
+      -50.0f, -0.5f,  50.0f, 1.0f,  // vértice 17
+    // Vértices para o cubo vermelho (mesmas posições do cubo original)
+    //    X      Y     Z     W
+        -0.5f,  0.5f,  0.5f, 1.0f, // posição do vértice 18
+        -0.5f, -0.5f,  0.5f, 1.0f, // posição do vértice 19
+         0.5f, -0.5f,  0.5f, 1.0f, // posição do vértice 20
+         0.5f,  0.5f,  0.5f, 1.0f, // posição do vértice 21
+        -0.5f,  0.5f, -0.5f, 1.0f, // posição do vértice 22
+        -0.5f, -0.5f, -0.5f, 1.0f, // posição do vértice 23
+         0.5f, -0.5f, -0.5f, 1.0f, // posição do vértice 24
+         0.5f,  0.5f, -0.5f, 1.0f  // posição do vértice 25
     };
 
 
@@ -822,7 +864,17 @@ GLuint BuildTriangles()
         0.3f, 0.7f, 0.2f, 1.0f, // cor do vértice 14
         0.3f, 0.7f, 0.2f, 1.0f, // cor do vértice 15
         0.3f, 0.7f, 0.2f, 1.0f, // cor do vértice 16
-        0.3f, 0.7f, 0.2f, 1.0f  // cor do vértice 17
+        0.3f, 0.7f, 0.2f, 1.0f,  // cor do vértice 17
+    // Cores para o cubo vermelho (todos os vértices vermelhos)
+    //  R     G     B     A
+        1.0f, 0.0f, 0.0f, 1.0f, // cor do vértice 18
+        1.0f, 0.0f, 0.0f, 1.0f, // cor do vértice 19
+        1.0f, 0.0f, 0.0f, 1.0f, // cor do vértice 20
+        1.0f, 0.0f, 0.0f, 1.0f, // cor do vértice 21
+        1.0f, 0.0f, 0.0f, 1.0f, // cor do vértice 22
+        1.0f, 0.0f, 0.0f, 1.0f, // cor do vértice 23
+        1.0f, 0.0f, 0.0f, 1.0f, // cor do vértice 24
+        1.0f, 0.0f, 0.0f, 1.0f  // cor do vértice 25
     };
     GLuint VBO_color_coefficients_id;
     glGenBuffers(1, &VBO_color_coefficients_id);
@@ -880,7 +932,20 @@ GLuint BuildTriangles()
     // Z, que serão desenhados com o modo GL_LINES.
         8 , 9 , // linha 1
         10, 11, // linha 2
-        12, 13  // linha 3
+        12, 13 , // linha 3
+    // Índices para as faces do cubo vermelho (com offset de 18)
+        18, 19, 20, // triângulo 1
+        25, 24, 23, // triângulo 2
+        21, 20, 24, // triângulo 3
+        22, 18, 21, // triângulo 4
+        22, 23, 19, // triângulo 5
+        19, 23, 24, // triângulo 6
+        18, 20, 21, // triângulo 7
+        25, 23, 22, // triângulo 8
+        21, 24, 25, // triângulo 9
+        22, 21, 25, // triângulo 10
+        22, 19, 18, // triângulo 11
+        19, 24, 20  // triângulo 12
     };
 
     // Criamos um primeiro objeto virtual (SceneObject) que se refere às faces
@@ -920,7 +985,20 @@ GLuint BuildTriangles()
     axes.first_index    = (void*)((36+6+24)*sizeof(GLuint)); // Primeiro índice está em indices[60]
     axes.num_indices    = 6; // Último índice está em indices[65]; total de 6 índices.
     axes.rendering_mode = GL_LINES; // Índices correspondem ao tipo de rasterização GL_LINES.
+
+    // Adicionamos o objeto criado acima na nossa cena virtual (g_VirtualScene).
     g_VirtualScene["axes"] = axes;
+
+    // Criamos um objeto para as faces do cubo vermelho
+    SceneObject damaged_cube_faces;
+    damaged_cube_faces.name           = "Cubo Danificado (faces)";
+    // O offset é a soma de todos os índices anteriores (cubo, chão, arestas, eixos)
+    damaged_cube_faces.first_index    = (void*)((36+6+24+6)*sizeof(GLuint));
+    damaged_cube_faces.num_indices    = 36;
+    damaged_cube_faces.rendering_mode = GL_TRIANGLES;
+
+    // Adicionamos o objeto criado acima na nossa cena virtual (g_VirtualScene).
+    g_VirtualScene["damaged_cube_faces"] = damaged_cube_faces;
 
     // Criamos um buffer OpenGL para armazenar os índices acima
     GLuint indices_id;
@@ -1346,6 +1424,37 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
             g_IsSwinging = true;
             g_SwingAnimationTime = 0.0f; // Reseta o tempo da animação
         }
+
+            // Lógica para quebrar o bloco
+            // Alcance da Picareta
+            float reach = 1.5f;
+            // Posição do alvo da picareta. Pega a posição da câmera e avança na direção do vetor de visão.
+            glm::vec4 target_pos = g_CameraPosition + g_CameraViewVector * reach;
+
+            // Converte a posição do alvo para coordenadas do grid
+            int grid_x = (int)(target_pos.x + (float)map_width / 2.0f + 0.5f);
+            int grid_z = (int)(target_pos.z + (float)map_height / 2.0f + 0.5f);
+
+            // Verifica se o alvo está dentro do mapa
+            if (grid_x >= 0 && grid_x < map_width && grid_z >= 0 && grid_z < map_height)
+            {
+                // Verifica o tipo atual do bloco e aplica ação dependendo do tipo
+                if (maze_map[grid_z][grid_x] == WALL || maze_map[grid_z][grid_x] == DAMAGED_WALL)
+                {
+                    switch (maze_map[grid_z][grid_x])
+                    {
+                        // Se for uma parede, vira uma parede danificada
+                        case WALL:
+                            maze_map[grid_z][grid_x] = DAMAGED_WALL;
+                            break;
+                            
+                        // Se for uma parede danificada, vira espaço vazio
+                        case DAMAGED_WALL:
+                            maze_map[grid_z][grid_x] = EMPTY;
+                            break;
+                    }
+                }
+            }
     }
 
     if (key == GLFW_KEY_W)
