@@ -13,6 +13,7 @@ uniform mat4 projection;
 #define OBJ_CUBE_WALL  0
 #define OBJ_CUBE_FLOOR 1
 #define OBJ_PICKAXE    2
+#define OBJ_CEILING    3
 
 uniform int object_id;
 uniform bool render_as_black;
@@ -23,6 +24,7 @@ uniform int is_damaged;
 uniform sampler2D TextureImage0; // Pedra
 uniform sampler2D TextureImage1; // Grama
 uniform sampler2D TextureImage2; // Madeira
+uniform sampler2D TextureImage3; // Teto (graystones)
 
 // Iluminação
 uniform vec4 bbox_min;
@@ -101,6 +103,13 @@ void main()
         V = position_world.z;
         tiling = 4.0; // Exemplo: Repete a textura 4x mais no chão
     }
+    else if (object_id == OBJ_CEILING)
+    {
+        // Teto - usa coordenadas X/Z como o chão
+        U = position_world.x;
+        V = position_world.z;
+        tiling = 4.0;
+    }
     else 
     {
         // Picareta
@@ -114,6 +123,8 @@ void main()
         Kd = texture(TextureImage0, vec2(U, V) * tiling).rgb;
     else if (object_id == OBJ_CUBE_FLOOR)
         Kd = texture(TextureImage1, vec2(U, V) * tiling).rgb;
+    else if (object_id == OBJ_CEILING)
+        Kd = texture(TextureImage3, vec2(U, V) * tiling).rgb;
     else
         Kd = texture(TextureImage2, vec2(U, V)).rgb;
 

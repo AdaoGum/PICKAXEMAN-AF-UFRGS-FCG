@@ -364,6 +364,7 @@ float g_AngleZ = 0.0f;
 bool g_LeftMouseButtonPressed = false;
 
 bool g_UseFreeCamera = true;
+bool g_ShowCeiling = true; // Controla visibilidade do teto
 
 // Variáveis que definem a câmera em coordenadas esféricas, controladas pelo
 // usuário através do mouse (veja função CursorPosCallback()). A posição
@@ -413,6 +414,10 @@ enum MapType { EMPTY = 0, WALL = 1, DAMAGED_WALL = 2 };
 GLuint g_TextureIdStone = 0;
 GLuint g_TextureIdGrass = 0;
 GLuint g_TextureIdWood = 0;
+GLuint g_TextureIdCobblestone = 0;
+GLuint g_TextureIdGravelstones = 0;
+GLuint g_textureIdGraystonse = 0;
+
 
 int main()
 {
@@ -525,6 +530,8 @@ int main()
     g_TextureIdStone = LoadTextureImage("../../data/425.jpg"); // Textura 0 (Paredes)
     g_TextureIdGrass = LoadTextureImage("../../data/grass.jpg"); // Textura 1 (Chão)
     g_TextureIdWood = LoadTextureImage("../../data/wood.jpg"); // Textura 2 (Picareta)
+    g_TextureIdGravelstones = LoadTextureImage("../../data/gravelstones.jpg"); // Textura 3 (Chão de Pedra)
+    g_textureIdGraystonse = LoadTextureImage("../../data/grayrocks.jpg"); // Textura 4 (Teto)
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -570,13 +577,16 @@ int main()
         glUseProgram(g_GpuProgramID);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, g_TextureIdStone); // Unidade 0 = Pedra
+        glBindTexture(GL_TEXTURE_2D, g_TextureIdStone); // Unidade 0 = Pedra Parede
 
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, g_TextureIdGrass); // Unidade 1 = Grama
+        glBindTexture(GL_TEXTURE_2D, g_TextureIdGravelstones); // Unidade 1 = Pedregulhos
 
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, g_TextureIdWood);  // Unidade 2 = Madeira
+
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, g_textureIdGraystonse);  // Unidade 3 = Teto
 
         // "Ligamos" o VAO. Informamos que queremos utilizar os atributos de
         // vértices apontados pelo VAO criado pela função BuildTriangles(). Veja
@@ -742,6 +752,22 @@ int main()
             );
         }
 
+        // Desenha o teto (apenas se g_ShowCeiling for true)
+        if (g_ShowCeiling)
+        {
+            glm::mat4 model = Matrix_Identity();
+
+            glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+            glUniform1i(glGetUniformLocation(g_GpuProgramID, "object_id"), 3); // ID 3 = Teto
+
+            glDrawElements(
+                g_VirtualScene["ceiling"].rendering_mode,
+                g_VirtualScene["ceiling"].num_indices,
+                GL_UNSIGNED_INT,
+                (void*)g_VirtualScene["ceiling"].first_index
+            );
+        }
+
         // Desenha o labirinto com base no maze_map
         // (Substitui o loop for (int i = 1; i <= 3; ++i))
         for (int z = 0; z < MAP_HEIGHT; ++z)
@@ -755,42 +781,49 @@ int main()
                     // O chão está em y = -0.5.
                     // Queremos que o cubo fique "em cima" do chão.
                     // Um translate(x, 0.0, z) posiciona o *centro* do cubo em y=0.0,
-                    // fazendo-o ocupar de y=-0.5 a y=0.5. Perfeito.
+                    // fazendo-o ocupar de y=-0.5 a y=0.5.
 
                     // Calcula a posição no mundo, centrando o labirinto em (0,0)
                     float pos_x = (float)x - (float)MAP_WIDTH / 2.0f;
                     float pos_z = (float)z - (float)MAP_HEIGHT / 2.0f;
 
-                    glm::mat4 model = Matrix_Translate(pos_x, 0.0f, pos_z);
+                    // Loop para empilhar 3 blocos verticalmente
+                    for (int y = 0; y < 3; ++y)
+                    {
+                        // Cada bloco tem altura 1.0, então empilhamos em y=0, y=1, y=2
+                        float pos_y = (float)y;
 
-                    // Envia a matriz "model" para a placa de vídeo (GPU).
-                    glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+                        glm::mat4 model = Matrix_Translate(pos_x, pos_y, pos_z);
 
-                    // Envia flag is_damaged para o shader (1 = danificada, 0 = intacta)
-                    glUniform1i(glGetUniformLocation(g_GpuProgramID, "is_damaged"), 
-                                (maze_map[z][x] == DAMAGED_WALL) ? 1 : 0);
+                        // Envia a matriz "model" para a placa de vídeo (GPU).
+                        glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 
-                    // Desenha as faces coloridas
-                    glUniform1i(glGetUniformLocation(g_GpuProgramID, "object_id"), 0);
-                    glDrawElements(
-                        g_VirtualScene["cube_faces"].rendering_mode,
-                        g_VirtualScene["cube_faces"].num_indices,
-                        GL_UNSIGNED_INT,
-                        (void*)g_VirtualScene["cube_faces"].first_index
-                    );
+                        // Envia flag is_damaged para o shader (1 = danificada, 0 = intacta)
+                        glUniform1i(glGetUniformLocation(g_GpuProgramID, "is_damaged"), 
+                                    (maze_map[z][x] == DAMAGED_WALL) ? 1 : 0);
 
-                    // Desenha as arestas pretas
-                    glLineWidth(4.0f);
-                    glUniform1i(glGetUniformLocation(g_GpuProgramID, "object_id"), 0);
-                    glDrawElements(
-                        g_VirtualScene["cube_edges"].rendering_mode,
-                        g_VirtualScene["cube_edges"].num_indices,
-                        GL_UNSIGNED_INT,
-                        (void*)g_VirtualScene["cube_edges"].first_index
-                    );
+                        // Desenha as faces coloridas
+                        glUniform1i(glGetUniformLocation(g_GpuProgramID, "object_id"), 0);
+                        glDrawElements(
+                            g_VirtualScene["cube_faces"].rendering_mode,
+                            g_VirtualScene["cube_faces"].num_indices,
+                            GL_UNSIGNED_INT,
+                            (void*)g_VirtualScene["cube_faces"].first_index
+                        );
 
-                    // Reseta is_damaged para 0 após desenhar
-                    glUniform1i(glGetUniformLocation(g_GpuProgramID, "is_damaged"), 0);
+                        // Desenha as arestas pretas
+                        glLineWidth(4.0f);
+                        glUniform1i(glGetUniformLocation(g_GpuProgramID, "object_id"), 0);
+                        glDrawElements(
+                            g_VirtualScene["cube_edges"].rendering_mode,
+                            g_VirtualScene["cube_edges"].num_indices,
+                            GL_UNSIGNED_INT,
+                            (void*)g_VirtualScene["cube_edges"].first_index
+                        );
+
+                        // Reseta is_damaged para 0 após desenhar
+                        glUniform1i(glGetUniformLocation(g_GpuProgramID, "is_damaged"), 0);
+                    }
                 }
             }
         }
@@ -1079,6 +1112,9 @@ void LoadShadersFromFiles()
     // Diz ao shader que "TextureImage2" deve ler da GL_TEXTURE2
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage2"), 2);
     
+    // Diz ao shader que "TextureImage3" deve ler da GL_TEXTURE3
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage3"), 3);
+    
     glUseProgram(0);
 
 }
@@ -1314,7 +1350,9 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
 
     if (key == GLFW_KEY_C && action == GLFW_PRESS)
     {
+        // Altera variáveis de controle da câmera e do teto
         g_UseFreeCamera = !g_UseFreeCamera;
+        g_ShowCeiling = !g_ShowCeiling;
     }
 
     float delta = 3.141592 / 16; // 22.5 graus, em radianos.

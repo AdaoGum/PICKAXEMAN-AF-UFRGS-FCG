@@ -70,7 +70,13 @@ inline GLuint BuildTriangles()
       -50.0f, -0.5f, -50.0f, 1.0f, // vértice 14
        50.0f, -0.5f, -50.0f, 1.0f, // vértice 15
        50.0f, -0.5f,  50.0f, 1.0f, // vértice 16
-      -50.0f, -0.5f,  50.0f, 1.0f  // vértice 17
+      -50.0f, -0.5f,  50.0f, 1.0f, // vértice 17
+    // Vértices para o teto (y = 2.5 - altura de 3 blocos empilhados)
+    //    X      Y     Z     W
+      -50.0f,  2.5f, -50.0f, 1.0f, // vértice 18
+       50.0f,  2.5f, -50.0f, 1.0f, // vértice 19
+       50.0f,  2.5f,  50.0f, 1.0f, // vértice 20
+      -50.0f,  2.5f,  50.0f, 1.0f  // vértice 21
     };
 
 
@@ -171,7 +177,12 @@ inline GLuint BuildTriangles()
         0.3f, 0.7f, 0.2f, 1.0f, // cor do vértice 14
         0.3f, 0.7f, 0.2f, 1.0f, // cor do vértice 15
         0.3f, 0.7f, 0.2f, 1.0f, // cor do vértice 16
-        0.3f, 0.7f, 0.2f, 1.0f  // cor do vértice 17
+        0.3f, 0.7f, 0.2f, 1.0f, // cor do vértice 17
+    // Cores para o teto (cinza)
+        0.5f, 0.5f, 0.5f, 1.0f, // cor do vértice 18
+        0.5f, 0.5f, 0.5f, 1.0f, // cor do vértice 19
+        0.5f, 0.5f, 0.5f, 1.0f, // cor do vértice 20
+        0.5f, 0.5f, 0.5f, 1.0f  // cor do vértice 21
     };
     GLuint VBO_color_coefficients_id;
     glGenBuffers(1, &VBO_color_coefficients_id);
@@ -210,6 +221,9 @@ inline GLuint BuildTriangles()
     // Definimos os índices para as FACES do chão
         14, 15, 16, // triângulo 1 (chão)
         14, 16, 17, // triângulo 2 (chão)
+    // Definimos os índices para as FACES do teto (ordem invertida para normal apontar para baixo)
+        18, 20, 19, // triângulo 1 (teto)
+        18, 21, 20, // triângulo 2 (teto)
     // Definimos os índices dos vértices que definem as ARESTAS de um cubo
     // através de 12 linhas que serão desenhadas com o modo de renderização
     // GL_LINES.
@@ -254,11 +268,20 @@ inline GLuint BuildTriangles()
     floor_faces.vertex_array_object_id = vertex_array_object_id;
     g_VirtualScene["floor"] = floor_faces;
 
+    // Criamos um objeto para o teto
+    SceneObject ceiling_faces;
+    ceiling_faces.name           = "ceiling";
+    ceiling_faces.first_index    = ((36+6)*sizeof(GLuint)); // Começa depois do chão
+    ceiling_faces.num_indices    = 6; // 2 triângulos = 6 índices
+    ceiling_faces.rendering_mode = GL_TRIANGLES;
+    ceiling_faces.vertex_array_object_id = vertex_array_object_id;
+    g_VirtualScene["ceiling"] = ceiling_faces;
+
     // Criamos um segundo objeto virtual (SceneObject) que se refere às arestas
     // pretas do cubo.
     SceneObject cube_edges;
     cube_edges.name           = "cube_edges";
-    cube_edges.first_index    = ((36+6)*sizeof(GLuint)); // Primeiro índice está em indices[36]
+    cube_edges.first_index    = ((36+6+6)*sizeof(GLuint)); // +6 do teto
     cube_edges.num_indices    = 24; // Último índice está em indices[59]; total de 24 índices.
     cube_edges.rendering_mode = GL_LINES; // Índices correspondem ao tipo de rasterização GL_LINES.
     cube_edges.vertex_array_object_id = vertex_array_object_id;
@@ -269,7 +292,7 @@ inline GLuint BuildTriangles()
     // Criamos um terceiro objeto virtual (SceneObject) que se refere aos eixos XYZ.
     SceneObject axes;
     axes.name           = "axes";
-    axes.first_index    = ((36+6+24)*sizeof(GLuint)); // Primeiro índice está em indices[60]
+    axes.first_index    = ((36+6+6+24)*sizeof(GLuint)); // +6 do teto
     axes.num_indices    = 6; // Último índice está em indices[65]; total de 6 índices.
     axes.rendering_mode = GL_LINES; // Índices correspondem ao tipo de rasterização GL_LINES.
     axes.vertex_array_object_id = vertex_array_object_id;

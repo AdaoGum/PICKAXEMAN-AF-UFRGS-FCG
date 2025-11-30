@@ -781,6 +781,7 @@ CMakeFiles/main.dir/src/main.cpp.obj: C:/Users/AdaoJr/Documents/UFRGS/FCG\ -\ Fu
   C:/Users/AdaoJr/Documents/UFRGS/FCG\ -\ Fundamentos\ de\ Computacao\ Grafica/trabalho\ final\ git/PICKAXEMAN-AF-UFRGS-FCG/include/glm/gtc/type_ptr.inl \
   C:/Users/AdaoJr/Documents/UFRGS/FCG\ -\ Fundamentos\ de\ Computacao\ Grafica/trabalho\ final\ git/PICKAXEMAN-AF-UFRGS-FCG/include/glm/mat4x4.hpp \
   C:/Users/AdaoJr/Documents/UFRGS/FCG\ -\ Fundamentos\ de\ Computacao\ Grafica/trabalho\ final\ git/PICKAXEMAN-AF-UFRGS-FCG/include/matrices.h \
+  C:/Users/AdaoJr/Documents/UFRGS/FCG\ -\ Fundamentos\ de\ Computacao\ Grafica/trabalho\ final\ git/PICKAXEMAN-AF-UFRGS-FCG/include/scene_builder.h \
   C:/Users/AdaoJr/Documents/UFRGS/FCG\ -\ Fundamentos\ de\ Computacao\ Grafica/trabalho\ final\ git/PICKAXEMAN-AF-UFRGS-FCG/include/stb_image.h \
   C:/Users/AdaoJr/Documents/UFRGS/FCG\ -\ Fundamentos\ de\ Computacao\ Grafica/trabalho\ final\ git/PICKAXEMAN-AF-UFRGS-FCG/include/tiny_obj_loader.h \
   C:/Users/AdaoJr/Documents/UFRGS/FCG\ -\ Fundamentos\ de\ Computacao\ Grafica/trabalho\ final\ git/PICKAXEMAN-AF-UFRGS-FCG/include/utils.h
@@ -1536,6 +1537,8 @@ C:/Program\ Files/CodeBlocks/MinGW/lib/gcc/x86_64-w64-mingw32/14.2.0/include/ser
 C:/Program\ Files/CodeBlocks/MinGW/include/c++/14.2.0/x86_64-w64-mingw32/bits/c++io.h:
 
 C:/Program\ Files/CodeBlocks/MinGW/lib/gcc/x86_64-w64-mingw32/14.2.0/include/sha512intrin.h:
+
+C:/Users/AdaoJr/Documents/UFRGS/FCG\ -\ Fundamentos\ de\ Computacao\ Grafica/trabalho\ final\ git/PICKAXEMAN-AF-UFRGS-FCG/include/scene_builder.h:
 
 C:/Program\ Files/CodeBlocks/MinGW/include/c++/14.2.0/typeinfo:
 
