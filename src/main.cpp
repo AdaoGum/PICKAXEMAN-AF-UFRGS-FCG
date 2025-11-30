@@ -40,6 +40,7 @@
 #include "utils.h"
 #include "matrices.h"
 #include "collisions.h"
+#include "scene_builder.h" // Contém BuildTriangles(), SceneObject e g_VirtualScene
 
 // Headers da biblioteca para carregar modelos obj
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -50,7 +51,6 @@
 
 // Declaração de várias funções utilizadas em main().  Essas estão definidas
 // logo após a definição de main() neste arquivo.
-GLuint BuildTriangles(); // Constrói triângulos para renderização
 void LoadShadersFromFiles(); // Carrega os shaders de vértice e fragmento, criando um programa de GPU
 GLuint LoadShader_Vertex(const char* filename);   // Carrega um vertex shader
 GLuint LoadShader_Fragment(const char* filename); // Carrega um fragment shader
@@ -85,20 +85,6 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-
-struct SceneObject
-{
-    std::string  name;              // Nome do objeto
-    size_t       first_index;       // Índice do primeiro vértice
-    size_t       num_indices;       // Número de índices
-    GLenum       rendering_mode;    // Modo de rasterização
-    GLuint       vertex_array_object_id; // ID do VAO
-    glm::vec3    bbox_min;          // Bounding Box min
-    glm::vec3    bbox_max;          // Bounding Box max
-};
-
-// Mapa atualizado para usar string como chave
-std::map<std::string, SceneObject> g_VirtualScene;
 
 // Estrutura ObjModel (Copiada do Lab 5)
 struct ObjModel
@@ -417,6 +403,12 @@ float g_SwingAnimationTime = 0.0f; // Controla o progresso da animação (em rad
 // Para animação e física independentes de framerate
 float g_DeltaTime = 0.0f;
 float g_LastFrameTime = 0.0f;
+
+// Enum para tipos de células do mapa
+// EMPTY = espaço vazio (pode andar)
+// WALL = parede intacta (colide e pode ser danificada)
+// DAMAGED_WALL = parede danificada (colide, aparece vermelha, próximo golpe destrói)
+enum MapType { EMPTY = 0, WALL = 1, DAMAGED_WALL = 2 };
 
 GLuint g_TextureIdStone = 0;
 GLuint g_TextureIdGrass = 0;
@@ -756,8 +748,8 @@ int main()
         {
             for (int x = 0; x < MAP_WIDTH; ++x)
             {
-                // Se for uma parede (1)
-                if (maze_map[z][x] == 1)
+                // Se for uma parede (WALL ou DAMAGED_WALL)
+                if (maze_map[z][x] == WALL || maze_map[z][x] == DAMAGED_WALL)
                 {
                     // Os cubos têm 1x1x1 (de -0.5 a 0.5).
                     // O chão está em y = -0.5.
@@ -773,6 +765,10 @@ int main()
 
                     // Envia a matriz "model" para a placa de vídeo (GPU).
                     glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+
+                    // Envia flag is_damaged para o shader (1 = danificada, 0 = intacta)
+                    glUniform1i(glGetUniformLocation(g_GpuProgramID, "is_damaged"), 
+                                (maze_map[z][x] == DAMAGED_WALL) ? 1 : 0);
 
                     // Desenha as faces coloridas
                     glUniform1i(glGetUniformLocation(g_GpuProgramID, "object_id"), 0);
@@ -792,6 +788,9 @@ int main()
                         GL_UNSIGNED_INT,
                         (void*)g_VirtualScene["cube_edges"].first_index
                     );
+
+                    // Reseta is_damaged para 0 após desenhar
+                    glUniform1i(glGetUniformLocation(g_GpuProgramID, "is_damaged"), 0);
                 }
             }
         }
@@ -936,282 +935,6 @@ int main()
 
     // Fim do programa
     return 0;
-}
-
-// Constrói triângulos para futura renderização
-GLuint BuildTriangles()
-{
-    // Primeiro, definimos os atributos de cada vértice.
-
-    // A posição de cada vértice é definida por coeficientes em um sistema de
-    // coordenadas local de cada modelo geométrico. Note o uso de coordenadas
-    // homogêneas.  Veja as seguintes referências:
-    //
-    //  - slides 35-48 do documento Aula_08_Sistemas_de_Coordenadas.pdf;
-    //  - slides 184-190 do documento Aula_08_Sistemas_de_Coordenadas.pdf;
-    //
-    // Este vetor "model_coefficients" define a GEOMETRIA (veja slides 103-110 do documento Aula_04_Modelagem_Geometrica_3D.pdf).
-    //
-    GLfloat model_coefficients[] = {
-    // Vértices de um cubo
-    //    X      Y     Z     W
-        -0.5f,  0.5f,  0.5f, 1.0f, // posição do vértice 0
-        -0.5f, -0.5f,  0.5f, 1.0f, // posição do vértice 1
-         0.5f, -0.5f,  0.5f, 1.0f, // posição do vértice 2
-         0.5f,  0.5f,  0.5f, 1.0f, // posição do vértice 3
-        -0.5f,  0.5f, -0.5f, 1.0f, // posição do vértice 4
-        -0.5f, -0.5f, -0.5f, 1.0f, // posição do vértice 5
-         0.5f, -0.5f, -0.5f, 1.0f, // posição do vértice 6
-         0.5f,  0.5f, -0.5f, 1.0f, // posição do vértice 7
-    // Vértices para desenhar o eixo X
-    //    X      Y     Z     W
-         0.0f,  0.0f,  0.0f, 1.0f, // posição do vértice 8
-         1.0f,  0.0f,  0.0f, 1.0f, // posição do vértice 9
-    // Vértices para desenhar o eixo Y
-    //    X      Y     Z     W
-         0.0f,  0.0f,  0.0f, 1.0f, // posição do vértice 10
-         0.0f,  1.0f,  0.0f, 1.0f, // posição do vértice 11
-    // Vértices para desenhar o eixo Z
-    //    X      Y     Z     W
-         0.0f,  0.0f,  0.0f, 1.0f, // posição do vértice 12
-         0.0f,  0.0f,  1.0f, 1.0f, // posição do vértice 13
-    // Vértices para o chão (y = -0.5)
-    //    X      Y     Z     W
-      -50.0f, -0.5f, -50.0f, 1.0f, // vértice 14
-       50.0f, -0.5f, -50.0f, 1.0f, // vértice 15
-       50.0f, -0.5f,  50.0f, 1.0f, // vértice 16
-      -50.0f, -0.5f,  50.0f, 1.0f  // vértice 17
-    };
-
-
-    // Criamos o identificador (ID) de um Vertex Buffer Object (VBO).  Um VBO é
-    // um buffer de memória que irá conter os valores de um certo atributo de
-    // um conjunto de vértices; por exemplo: posição, cor, normais, coordenadas
-    // de textura.  Neste exemplo utilizaremos vários VBOs, um para cada tipo de atributo.
-    // Agora criamos um VBO para armazenarmos um atributo: posição.
-    GLuint VBO_model_coefficients_id;
-    glGenBuffers(1, &VBO_model_coefficients_id);
-
-    // Criamos o identificador (ID) de um Vertex Array Object (VAO).  Um VAO
-    // contém a definição de vários atributos de um certo conjunto de vértices;
-    // isto é, um VAO irá conter ponteiros para vários VBOs.
-    GLuint vertex_array_object_id;
-    glGenVertexArrays(1, &vertex_array_object_id);
-
-    // "Ligamos" o VAO ("bind"). Informamos que iremos atualizar o VAO cujo ID
-    // está contido na variável "vertex_array_object_id".
-    glBindVertexArray(vertex_array_object_id);
-
-    // "Ligamos" o VBO ("bind"). Informamos que o VBO cujo ID está contido na
-    // variável VBO_model_coefficients_id será modificado a seguir. A
-    // constante "GL_ARRAY_BUFFER" informa que esse buffer é de fato um VBO, e
-    // irá conter atributos de vértices.
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_model_coefficients_id);
-
-    // Alocamos memória para o VBO "ligado" acima. Como queremos armazenar
-    // nesse VBO todos os valores contidos no array "model_coefficients", pedimos
-    // para alocar um número de bytes exatamente igual ao tamanho ("size")
-    // desse array. A constante "GL_STATIC_DRAW" dá uma dica para o driver da
-    // GPU sobre como utilizaremos os dados do VBO. Neste caso, estamos dizendo
-    // que não pretendemos alterar tais dados (são estáticos: "STATIC"), e
-    // também dizemos que tais dados serão utilizados para renderizar ou
-    // desenhar ("DRAW").  Pense que:
-    //
-    //            glBufferData()  ==  malloc() do C  ==  new do C++.
-    //
-    glBufferData(GL_ARRAY_BUFFER, sizeof(model_coefficients), NULL, GL_STATIC_DRAW);
-
-    // Finalmente, copiamos os valores do array model_coefficients para dentro do
-    // VBO "ligado" acima.  Pense que:
-    //
-    //            glBufferSubData()  ==  memcpy() do C.
-    //
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(model_coefficients), model_coefficients);
-
-    // Precisamos então informar um índice de "local" ("location"), o qual será
-    // utilizado no shader "shader_vertex.glsl" para acessar os valores
-    // armazenados no VBO "ligado" acima. Também, informamos a dimensão (número de
-    // coeficientes) destes atributos. Como em nosso caso são pontos em coordenadas
-    // homogêneas, temos quatro coeficientes por vértice (X,Y,Z,W). Isso define
-    // um tipo de dado chamado de "vec4" em "shader_vertex.glsl": um vetor com
-    // quatro coeficientes. Finalmente, informamos que os dados estão em ponto
-    // flutuante com 32 bits (GL_FLOAT).
-    // Esta função também informa que o VBO "ligado" acima em glBindBuffer()
-    // está dentro do VAO "ligado" acima por glBindVertexArray().
-    // Veja https://www.khronos.org/opengl/wiki/Vertex_Specification#Vertex_Buffer_Object
-    GLuint location = 0; // "(location = 0)" em "shader_vertex.glsl"
-    GLint  number_of_dimensions = 4; // vec4 em "shader_vertex.glsl"
-    glVertexAttribPointer(location, number_of_dimensions, GL_FLOAT, GL_FALSE, 0, 0);
-
-    // "Ativamos" os atributos. Informamos que os atributos com índice de local
-    // definido acima, na variável "location", deve ser utilizado durante o
-    // rendering.
-    glEnableVertexAttribArray(location);
-
-    // "Desligamos" o VBO, evitando assim que operações posteriores venham a
-    // alterar o mesmo. Isso evita bugs.
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    // Agora repetimos todos os passos acima para atribuir um novo atributo a
-    // cada vértice: uma cor (veja slides 109-112 do documento Aula_03_Rendering_Pipeline_Grafico.pdf e slide 111 do documento Aula_04_Modelagem_Geometrica_3D.pdf).
-    // Tal cor é definida como coeficientes RGBA: Red, Green, Blue, Alpha;
-    // isto é: Vermelho, Verde, Azul, Alpha (valor de transparência).
-    // Conversaremos sobre sistemas de cores nas aulas de Modelos de Iluminação.
-    GLfloat color_coefficients[] = {
-    // Cores dos vértices do cubo
-    //  R     G     B     A
-        1.0f, 0.5f, 0.0f, 1.0f, // cor do vértice 0
-        1.0f, 0.5f, 0.0f, 1.0f, // cor do vértice 1
-        0.0f, 0.5f, 1.0f, 1.0f, // cor do vértice 2
-        0.0f, 0.5f, 1.0f, 1.0f, // cor do vértice 3
-        1.0f, 0.5f, 0.0f, 1.0f, // cor do vértice 4
-        1.0f, 0.5f, 0.0f, 1.0f, // cor do vértice 5
-        0.0f, 0.5f, 1.0f, 1.0f, // cor do vértice 6
-        0.0f, 0.5f, 1.0f, 1.0f, // cor do vértice 7
-    // Cores para desenhar o eixo X
-        1.0f, 0.0f, 0.0f, 1.0f, // cor do vértice 8
-        1.0f, 0.0f, 0.0f, 1.0f, // cor do vértice 9
-    // Cores para desenhar o eixo Y
-        0.0f, 1.0f, 0.0f, 1.0f, // cor do vértice 10
-        0.0f, 1.0f, 0.0f, 1.0f, // cor do vértice 11
-    // Cores para desenhar o eixo Z
-        0.0f, 0.0f, 1.0f, 1.0f, // cor do vértice 12
-        0.0f, 0.0f, 1.0f, 1.0f, // cor do vértice 13
-    // Cores para o chão (verde)
-        0.3f, 0.7f, 0.2f, 1.0f, // cor do vértice 14
-        0.3f, 0.7f, 0.2f, 1.0f, // cor do vértice 15
-        0.3f, 0.7f, 0.2f, 1.0f, // cor do vértice 16
-        0.3f, 0.7f, 0.2f, 1.0f  // cor do vértice 17
-    };
-    GLuint VBO_color_coefficients_id;
-    glGenBuffers(1, &VBO_color_coefficients_id);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_color_coefficients_id);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(color_coefficients), NULL, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(color_coefficients), color_coefficients);
-    location = 1; // "(location = 1)" em "shader_vertex.glsl"
-    number_of_dimensions = 4; // vec4 em "shader_vertex.glsl"
-    glVertexAttribPointer(location, number_of_dimensions, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(location);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    // Vamos então definir polígonos utilizando os vértices do array
-    // model_coefficients.
-    //
-    // Para referência sobre os modos de renderização, veja slides 182-188 do documento Aula_04_Modelagem_Geometrica_3D.pdf.
-    //
-    // Este vetor "indices" define a TOPOLOGIA (veja slides 103-110 do documento Aula_04_Modelagem_Geometrica_3D.pdf).
-    //
-    GLuint indices[] = {
-    // Definimos os índices dos vértices que definem as FACES de um cubo
-    // através de 12 triângulos que serão desenhados com o modo de renderização
-    // GL_TRIANGLES.
-        0, 1, 2, // triângulo 1
-        7, 6, 5, // triângulo 2
-        3, 2, 6, // triângulo 3
-        4, 0, 3, // triângulo 4
-        4, 5, 1, // triângulo 5
-        1, 5, 6, // triângulo 6
-        0, 2, 3, // triângulo 7
-        7, 5, 4, // triângulo 8
-        3, 6, 7, // triângulo 9
-        4, 3, 7, // triângulo 10
-        4, 1, 0, // triângulo 11
-        1, 6, 2, // triângulo 12
-    // Definimos os índices para as FACES do chão
-        14, 15, 16, // triângulo 1 (chão)
-        14, 16, 17, // triângulo 2 (chão)
-    // Definimos os índices dos vértices que definem as ARESTAS de um cubo
-    // através de 12 linhas que serão desenhadas com o modo de renderização
-    // GL_LINES.
-        0, 1, // linha 1
-        1, 2, // linha 2
-        2, 3, // linha 3
-        3, 0, // linha 4
-        0, 4, // linha 5
-        4, 7, // linha 6
-        7, 6, // linha 7
-        6, 2, // linha 8
-        6, 5, // linha 9
-        5, 4, // linha 10
-        5, 1, // linha 11
-        7, 3, // linha 12
-    // Definimos os índices dos vértices que definem as linhas dos eixos X, Y,
-    // Z, que serão desenhados com o modo GL_LINES.
-        8 , 9 , // linha 1
-        10, 11, // linha 2
-        12, 13  // linha 3
-    };
-
-    // Criamos um primeiro objeto virtual (SceneObject) que se refere às faces
-    // coloridas do cubo.
-    SceneObject cube_faces;
-    cube_faces.name           = "cube_faces";
-    cube_faces.first_index    = 0; // Primeiro índice está em indices[0]
-    cube_faces.num_indices    = 36;       // Último índice está em indices[35]; total de 36 índices.
-    cube_faces.rendering_mode = GL_TRIANGLES; // Índices correspondem ao tipo de rasterização GL_TRIANGLES.
-    cube_faces.vertex_array_object_id = vertex_array_object_id; // Novo campo
-
-    // Adicionamos o objeto criado acima na nossa cena virtual (g_VirtualScene).
-    g_VirtualScene["cube_faces"] = cube_faces;
-
-
-    // Criamos um objeto para o chão
-    SceneObject floor_faces;
-    floor_faces.name           = "floor";
-    floor_faces.first_index    = (36*sizeof(GLuint)); // Começa depois das faces do cubo (índice 36)
-    floor_faces.num_indices    = 6; // 2 triângulos = 6 índices
-    floor_faces.rendering_mode = GL_TRIANGLES;
-    floor_faces.vertex_array_object_id = vertex_array_object_id;
-    g_VirtualScene["floor"] = floor_faces;
-
-    // Criamos um segundo objeto virtual (SceneObject) que se refere às arestas
-    // pretas do cubo.
-    SceneObject cube_edges;
-    cube_edges.name           = "cube_edges";
-    cube_edges.first_index    = ((36+6)*sizeof(GLuint)); // Primeiro índice está em indices[36]
-    cube_edges.num_indices    = 24; // Último índice está em indices[59]; total de 24 índices.
-    cube_edges.rendering_mode = GL_LINES; // Índices correspondem ao tipo de rasterização GL_LINES.
-    cube_edges.vertex_array_object_id = vertex_array_object_id;
-
-    // Adicionamos o objeto criado acima na nossa cena virtual (g_VirtualScene).
-    g_VirtualScene["cube_edges"] = cube_edges;
-
-    // Criamos um terceiro objeto virtual (SceneObject) que se refere aos eixos XYZ.
-    SceneObject axes;
-    axes.name           = "axes";
-    axes.first_index    = ((36+6+24)*sizeof(GLuint)); // Primeiro índice está em indices[60]
-    axes.num_indices    = 6; // Último índice está em indices[65]; total de 6 índices.
-    axes.rendering_mode = GL_LINES; // Índices correspondem ao tipo de rasterização GL_LINES.
-    axes.vertex_array_object_id = vertex_array_object_id;
-    g_VirtualScene["axes"] = axes;
-
-    // Criamos um buffer OpenGL para armazenar os índices acima
-    GLuint indices_id;
-    glGenBuffers(1, &indices_id);
-
-    // "Ligamos" o buffer. Note que o tipo agora é GL_ELEMENT_ARRAY_BUFFER.
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_id);
-
-    // Alocamos memória para o buffer.
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), NULL, GL_STATIC_DRAW);
-
-    // Copiamos os valores do array indices[] para dentro do buffer.
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(indices), indices);
-
-    // NÃO faça a chamada abaixo! Diferente de um VBO (GL_ARRAY_BUFFER), um
-    // array de índices (GL_ELEMENT_ARRAY_BUFFER) não pode ser "desligado",
-    // caso contrário o VAO irá perder a informação sobre os índices.
-    //
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // XXX Errado!
-    //
-
-    // "Desligamos" o VAO, evitando assim que operações posteriores venham a
-    // alterar o mesmo. Isso evita bugs.
-    glBindVertexArray(0);
-
-    // Retornamos o ID do VAO. Isso é tudo que será necessário para renderizar
-    // os triângulos definidos acima. Veja a chamada glDrawElements() em main().
-    return vertex_array_object_id;
 }
 
 // Carrega um Vertex Shader de um arquivo GLSL. Veja definição de LoadShader() abaixo.
@@ -1641,8 +1364,45 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     {
         if (!g_IsSwinging)
         {
+            // Controle da animação de balanço da picareta
             g_IsSwinging = true;
-            g_SwingAnimationTime = 0.0f; // Reseta o tempo da animação
+            // Reseta a animação
+            g_SwingAnimationTime = 0.0f;
+
+            // *** LÓGICA DE QUEBRAR PAREDES ***
+            // Calcula a posição do bloco à frente da câmera
+            // Usamos um raio de alcance para verificar onde o jogador está olhando
+            float reach_distance = 1.5f; // Distância de alcance da picareta
+
+            // Direção que o jogador está olhando (sem componente Y para simplificar)
+            glm::vec4 look_direction = glm::vec4(g_CameraViewVector.x, 0.0f, g_CameraViewVector.z, 0.0f);
+            if (length(look_direction) > 0.0f)
+                look_direction = normalize(look_direction);
+
+            // Posição do bloco à frente
+            float target_x = g_CameraPosition.x + look_direction.x * reach_distance;
+            float target_z = g_CameraPosition.z + look_direction.z * reach_distance;
+
+            // Converte coordenadas de mundo para índices do mapa
+            int grid_x = (int)(target_x + (float)MAP_WIDTH / 2.0f + 0.5f);
+            int grid_z = (int)(target_z + (float)MAP_HEIGHT / 2.0f + 0.5f);
+
+            // Verifica se está dentro dos limites do mapa
+            if (grid_x >= 0 && grid_x < MAP_WIDTH && grid_z >= 0 && grid_z < MAP_HEIGHT)
+            {
+                // Lógica de dano progressivo:
+                // WALL (1) => DAMAGED_WALL (2) = > EMPTY (0)
+                if (maze_map[grid_z][grid_x] == WALL)
+                {
+                    maze_map[grid_z][grid_x] = DAMAGED_WALL;
+                    printf("Parede danificada em (%d, %d)!\n", grid_x, grid_z);
+                }
+                else if (maze_map[grid_z][grid_x] == DAMAGED_WALL)
+                {
+                    maze_map[grid_z][grid_x] = EMPTY;
+                    printf("Parede destruida em (%d, %d)!\n", grid_x, grid_z);
+                }
+            }
         }
     }
 

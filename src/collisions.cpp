@@ -3,7 +3,9 @@
 #include <cmath> 
 
 // Definição do mapa
-// 0 = espaço vazio, 1 = parede
+// 0 = EMPTY (espaço vazio)
+// 1 = WALL (parede intacta)
+// 2 = DAMAGED_WALL (parede danificada - aparece vermelha)
 int maze_map[MAP_HEIGHT][MAP_WIDTH] = {
     {1,1,1,1,1,1,1,1,1,1},
     {1,0,0,0,0,0,0,0,0,1},
@@ -18,6 +20,7 @@ int maze_map[MAP_HEIGHT][MAP_WIDTH] = {
 };
 
 // Implementação da função de colisão
+// Retorna true se houver colisão com WALL (1) ou DAMAGED_WALL (2)
 bool CheckCollision(float x, float z)
 {
     // Raio do corpo do personagem
@@ -44,9 +47,12 @@ bool CheckCollision(float x, float z)
         // Verifica se está dentro dos limites do mapa
         if (grid_x >= 0 && grid_x < MAP_WIDTH && grid_z >= 0 && grid_z < MAP_HEIGHT)
         {
-            // Se for 1, é parede
-            if (maze_map[grid_z][grid_x] == 1)
+            // Colide com WALL (1) ou DAMAGED_WALL (2)
+            // Só não colide com EMPTY (0)
+            if (maze_map[grid_z][grid_x] != 0)
                 return true;
+
+            //TODO: Futuramente, garantir que funciona com todos os tipos de blocos
         }
     }
     return false;

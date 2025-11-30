@@ -16,6 +16,8 @@ uniform mat4 projection;
 
 uniform int object_id;
 uniform bool render_as_black;
+// Flag para paredes danificadas 0 = intacta, 1 = danificada
+uniform int is_damaged;
 
 // Texturas
 uniform sampler2D TextureImage0; // Pedra
@@ -128,6 +130,14 @@ void main()
     if (lambert <= 0.0) specular_term = 0.0;
 
     color.rgb = Ka + (Kd * lambert * I) + (Ks * specular_term * I);
+
+    // Se a parede está danificada, mistura com cor vermelha
+    if (is_damaged == 1 && object_id == OBJ_CUBE_WALL)
+    {
+        vec3 damaged_color = vec3(0.8, 0.2, 0.2); // Vermelho
+        color.rgb = mix(color.rgb, damaged_color, 0.5); // 50% de mistura com vermelho
+    }
+
     color.a = 1.0;
     color.rgb = pow(color.rgb, vec3(1.0/2.2));
 }
