@@ -602,13 +602,13 @@ int main()
 
             glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(handle_model));
 
-            // Desenha faces do cabo
+            // Desenha faces do cabo (agora usando o cubo preto)
             glUniform1i(render_as_black_uniform, false);
             glDrawElements(
-                g_VirtualScene["cube_faces"].rendering_mode,
-                g_VirtualScene["cube_faces"].num_indices,
+                g_VirtualScene["black_cube_faces"].rendering_mode,
+                g_VirtualScene["black_cube_faces"].num_indices,
                 GL_UNSIGNED_INT,
-                (void*)g_VirtualScene["cube_faces"].first_index
+                (void*)g_VirtualScene["black_cube_faces"].first_index
             );
             // Desenha arestas do cabo
             glUniform1i(render_as_black_uniform, true);
@@ -632,10 +632,10 @@ int main()
             // Desenha faces da cabeça
             glUniform1i(render_as_black_uniform, false);
             glDrawElements(
-                g_VirtualScene["cube_faces"].rendering_mode,
-                g_VirtualScene["cube_faces"].num_indices,
+                g_VirtualScene["black_cube_faces"].rendering_mode,
+                g_VirtualScene["black_cube_faces"].num_indices,
                 GL_UNSIGNED_INT,
-                (void*)g_VirtualScene["cube_faces"].first_index
+                (void*)g_VirtualScene["black_cube_faces"].first_index
             );
             // Desenha arestas da cabeça
             glUniform1i(render_as_black_uniform, true);

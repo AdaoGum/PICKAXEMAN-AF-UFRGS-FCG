@@ -59,7 +59,16 @@ inline GLuint BuildTriangles()
         -0.5f,  0.5f, -0.5f, 1.0f, // posição do vértice 22
         -0.5f, -0.5f, -0.5f, 1.0f, // posição do vértice 23
          0.5f, -0.5f, -0.5f, 1.0f, // posição do vértice 24
-         0.5f,  0.5f, -0.5f, 1.0f  // posição do vértice 25
+         0.5f,  0.5f, -0.5f, 1.0f,  // posição do vértice 25
+    // Vértices para o cubo preto usado na picareta
+        -0.5f,  0.5f,  0.5f, 1.0f, // posição do vértice 26
+        -0.5f, -0.5f,  0.5f, 1.0f, // posição do vértice 27
+         0.5f, -0.5f,  0.5f, 1.0f, // posição do vértice 28
+         0.5f,  0.5f,  0.5f, 1.0f, // posição do vértice 29
+        -0.5f,  0.5f, -0.5f, 1.0f, // posição do vértice 30
+        -0.5f, -0.5f, -0.5f, 1.0f, // posição do vértice 31
+         0.5f, -0.5f, -0.5f, 1.0f, // posição do vértice 32
+         0.5f,  0.5f, -0.5f, 1.0f  // posição do vértice 33
     };
 
     GLuint VBO_model_coefficients_id;
@@ -80,13 +89,13 @@ inline GLuint BuildTriangles()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     GLfloat color_coefficients[] = {
-    // Cores dos vértices do cubo (agora AZUL)
-        1.0f, 0.5f, 0.0f, 1.0f, // cor do vértice 0
-        1.0f, 0.5f, 0.0f, 1.0f, // cor do vértice 1
+    // Cores para o cubo vermelho
+        0.0f, 0.5f, 1.0f, 1.0f, // cor do vértice 0
+        0.0f, 0.5f, 1.0f, 1.0f, // cor do vértice 1
         0.0f, 0.5f, 1.0f, 1.0f, // cor do vértice 2
         0.0f, 0.5f, 1.0f, 1.0f, // cor do vértice 3
-        1.0f, 0.5f, 0.0f, 1.0f, // cor do vértice 4
-        1.0f, 0.5f, 0.0f, 1.0f, // cor do vértice 5
+        0.0f, 0.5f, 1.0f, 1.0f, // cor do vértice 4
+        0.0f, 0.5f, 1.0f, 1.0f, // cor do vértice 5
         0.0f, 0.5f, 1.0f, 1.0f, // cor do vértice 6
         0.0f, 0.5f, 1.0f, 1.0f, // cor do vértice 7
     // Cores para desenhar o eixo X
@@ -103,7 +112,7 @@ inline GLuint BuildTriangles()
         0.3f, 0.7f, 0.2f, 1.0f, // cor do vértice 15
         0.3f, 0.7f, 0.2f, 1.0f, // cor do vértice 16
         0.3f, 0.7f, 0.2f, 1.0f,  // cor do vértice 17
-    // Cores para o cubo vermelho (todos os vértices vermelhos)
+    // Cores para o cubo vermelho
         1.0f, 0.0f, 0.0f, 1.0f, // cor do vértice 18
         1.0f, 0.0f, 0.0f, 1.0f, // cor do vértice 19
         1.0f, 0.0f, 0.0f, 1.0f, // cor do vértice 20
@@ -111,7 +120,16 @@ inline GLuint BuildTriangles()
         1.0f, 0.0f, 0.0f, 1.0f, // cor do vértice 22
         1.0f, 0.0f, 0.0f, 1.0f, // cor do vértice 23
         1.0f, 0.0f, 0.0f, 1.0f, // cor do vértice 24
-        1.0f, 0.0f, 0.0f, 1.0f  // cor do vértice 25
+        1.0f, 0.0f, 0.0f, 1.0f,  // cor do vértice 25
+    // Cores para o cubo preto
+        0.1f, 0.1f, 0.1f, 1.0f, // cor do vértice 26
+        0.1f, 0.1f, 0.1f, 1.0f, // cor do vértice 27
+        0.1f, 0.1f, 0.1f, 1.0f, // cor do vértice 28
+        0.1f, 0.1f, 0.1f, 1.0f, // cor do vértice 29
+        0.1f, 0.1f, 0.1f, 1.0f, // cor do vértice 30
+        0.1f, 0.1f, 0.1f, 1.0f, // cor do vértice 31
+        0.1f, 0.1f, 0.1f, 1.0f, // cor do vértice 32
+        0.1f, 0.1f, 0.1f, 1.0f  // cor do vértice 33
     };
     GLuint VBO_color_coefficients_id;
     glGenBuffers(1, &VBO_color_coefficients_id);
@@ -136,7 +154,10 @@ inline GLuint BuildTriangles()
         8 , 9 , 10, 11, 12, 13,
     // FACES do cubo vermelho (com offset de 18)
         18, 19, 20, 25, 24, 23, 21, 20, 24, 22, 18, 21, 22, 23, 19, 19, 23, 24,
-        18, 20, 21, 25, 23, 22, 21, 24, 25, 22, 21, 25, 22, 19, 18, 19, 24, 20
+        18, 20, 21, 25, 23, 22, 21, 24, 25, 22, 21, 25, 22, 19, 18, 19, 24, 20,
+    // FACES do cubo preto (com offset de 26)
+        26, 27, 28, 33, 32, 31, 29, 28, 32, 30, 26, 29, 30, 31, 27, 27, 31, 32,
+        26, 28, 29, 33, 31, 30, 29, 32, 33, 30, 29, 33, 30, 27, 26, 27, 32, 28
     };
 
     SceneObject cube_faces;
@@ -183,6 +204,17 @@ inline GLuint BuildTriangles()
     damaged_cube_faces.bbox_min       = glm::vec4(-0.5f, -0.5f, -0.5f, 1.0f);
     damaged_cube_faces.bbox_max       = glm::vec4( 0.5f,  0.5f,  0.5f, 1.0f);
     g_VirtualScene["damaged_cube_faces"] = damaged_cube_faces;
+
+    // Adiciona o novo objeto para o cubo preto
+    SceneObject black_cube_faces;
+    black_cube_faces.name           = "Cubo Preto (faces)";
+    // O offset é a soma de todos os índices anteriores
+    black_cube_faces.first_index    = (void*)((36+6+24+6+36)*sizeof(GLuint));
+    black_cube_faces.num_indices    = 36;
+    black_cube_faces.rendering_mode = GL_TRIANGLES;
+    black_cube_faces.bbox_min       = glm::vec4(-0.5f, -0.5f, -0.5f, 1.0f);
+    black_cube_faces.bbox_max       = glm::vec4( 0.5f,  0.5f,  0.5f, 1.0f);
+    g_VirtualScene["black_cube_faces"] = black_cube_faces;
 
     GLuint indices_id;
     glGenBuffers(1, &indices_id);
