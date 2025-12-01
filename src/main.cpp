@@ -399,7 +399,26 @@ GLuint g_GpuProgramID = 0;
 
 // Variáveis para animação da picareta
 bool g_IsSwinging = false;         // Controla se a animação está ativa
-float g_SwingAnimationTime = 0.0f; // Controla o progresso da animação (em radianos)
+float g_SwingAnimationTime = 0.0f; // Controla o progresso da animação (t de 0 a 1)
+
+// Função para calcular ponto em curva de Bézier Cúbica
+// c(t) = (1-t)^3 * P0 + 3t(1-t)^2 * P1 + 3t^2(1-t) * P2 + t^3 * P3
+glm::vec3 BezierCubic(float t, glm::vec3 P0, glm::vec3 P1, glm::vec3 P2, glm::vec3 P3)
+{
+    glm::vec3 point = (1.0f - t) * (1.0f - t) * (1.0f - t) * P0;              // (1-t)^3 * P0
+    point += 3.0f * t * (1.0f - t) * (1.0f - t) * P1;             // 3t(1-t)^2 * P1
+    point += 3.0f * t * t * (1.0f - t) * P2;             // 3t^2(1-t) * P2
+    point += t * t * t * P3;                        // t^3 * P3
+    
+    return point;
+}
+
+// Pontos de controle para a animação da picareta (x = ângulo X, y = ângulo Y, z = posição Z)
+// P0 - repouso, P1 começa, P2 continua movimento, P3 posição final
+const glm::vec3 g_BezierP0 = glm::vec3(0.0f, 0.0f, 0.0f);       // Repouso
+const glm::vec3 g_BezierP1 = glm::vec3(-30.0f, 10.0f, 0.1f);   // Levanta e puxa para trás
+const glm::vec3 g_BezierP2 = glm::vec3(-70.0f, -5.0f, -0.1f);  // Prepara o golpe
+const glm::vec3 g_BezierP3 = glm::vec3(-90.0f, 0.0f, -0.2f);   // Golpe final
 
 // Para animação e física independentes de framerate
 float g_DeltaTime = 0.0f;
@@ -409,7 +428,8 @@ float g_LastFrameTime = 0.0f;
 // EMPTY = espaço vazio (pode andar)
 // WALL = parede intacta (colide e pode ser danificada)
 // DAMAGED_WALL = parede danificada (colide, aparece vermelha, próximo golpe destrói)
-enum MapType { EMPTY = 0, WALL = 1, DAMAGED_WALL = 2 };
+// DIAMOND = diamante
+enum MapType { EMPTY = 0, WALL = 1, DAMAGED_WALL = 2, DIAMOND = 3 };
 
 GLuint g_TextureIdStone = 0;
 GLuint g_TextureIdGrass = 0;
@@ -417,6 +437,7 @@ GLuint g_TextureIdWood = 0;
 GLuint g_TextureIdCobblestone = 0;
 GLuint g_TextureIdGravelstones = 0;
 GLuint g_textureIdGraystonse = 0;
+GLuint g_TextureIdDiamond = 0; // Textura do diamante
 
 
 int main()
@@ -505,6 +526,17 @@ int main()
     ComputeNormals(&pickaxeModel);
     BuildTrianglesAndAddToVirtualScene(&pickaxeModel);
 
+    // CARREGAMENTO DO OBJ (Diamante)
+    ObjModel diamondModel("../../data/obj/diamond_obj.obj"); 
+    ComputeNormals(&diamondModel);
+    BuildTrianglesAndAddToVirtualScene(&diamondModel);
+    
+    // Debug: mostra os nomes dos objetos carregados
+    printf("Objetos na cena virtual:\n");
+    for (auto& pair : g_VirtualScene) {
+        printf("  - '%s'\n", pair.first.c_str());
+    }
+
     // Buscamos o endereço das variáveis definidas dentro do Vertex Shader.
     // Utilizaremos estas variáveis para enviar dados para a placa de vídeo
     // (GPU)! Veja arquivo "shader_vertex.glsl".
@@ -532,6 +564,7 @@ int main()
     g_TextureIdWood = LoadTextureImage("../../data/wood.jpg"); // Textura 2 (Picareta)
     g_TextureIdGravelstones = LoadTextureImage("../../data/gravelstones.jpg"); // Textura 3 (Chão de Pedra)
     g_textureIdGraystonse = LoadTextureImage("../../data/grayrocks.jpg"); // Textura 4 (Teto)
+    g_TextureIdDiamond = LoadTextureImage("../../data/obj/diamond_obj.png"); // Textura 5 (Diamante)
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -545,12 +578,13 @@ int main()
         // Atualização da Animação
         if (g_IsSwinging)
         {
-            float swing_speed = 10.0f; // Velocidade da animação (radianos/seg)
+            float swing_speed = 3.0f; // Velocidade da animação (unidades/seg)
             g_SwingAnimationTime += swing_speed * g_DeltaTime;
 
-            // Usamos PI (3.141592) porque a função sin(x) de 0 a PI
-            // faz um movimento de "ida e volta" (0 -> 1 -> 0).
-            if (g_SwingAnimationTime >= 3.141592f)
+            // Animação vai de 0 a 2:
+            // - De 0 a 1: ida (movimento de golpe)
+            // - De 1 a 2: volta (retorno à posição inicial)
+            if (g_SwingAnimationTime >= 2.0f)
             {
                 g_IsSwinging = false;
                 g_SwingAnimationTime = 0.0f;
@@ -587,6 +621,9 @@ int main()
 
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, g_textureIdGraystonse);  // Unidade 3 = Teto
+
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_2D, g_TextureIdDiamond);  // Unidade 4 = Diamante
 
         // "Ligamos" o VAO. Informamos que queremos utilizar os atributos de
         // vértices apontados pelo VAO criado pela função BuildTriangles(). Veja
@@ -768,6 +805,54 @@ int main()
             );
         }
 
+        // Desenha os diamantes baseado no mapa
+        {
+            // Rotação contínua baseada no tempo
+            float diamond_rotation = (float)glfwGetTime() * 1.0f; // 1 rad/s
+
+            for (int z = 0; z < MAP_HEIGHT; ++z)
+            {
+                for (int x = 0; x < MAP_WIDTH; ++x)
+                {
+                    if (maze_map[z][x] == DIAMOND)
+                    {
+                        // Calcula a posição no mundo, centrando o labirinto em (0,0)
+                        float pos_x = (float)x - (float)MAP_WIDTH / 2.0f;
+                        float pos_z = (float)z - (float)MAP_HEIGHT / 2.0f;
+
+                        // Posição do diamante (um pouco acima do chão)
+                        // Rotação X de 90 graus para ficar em pé
+                        glm::mat4 model = Matrix_Translate(pos_x, 0.2f, pos_z)
+                                        * Matrix_Rotate_Y(diamond_rotation)
+                                        // Gira e deixa em pé
+                                        * Matrix_Rotate_X(glm::radians(-90.0f))
+                                        // Diminuiu o tamanho do diamante
+                                        * Matrix_Scale(0.007f, 0.007f, 0.007f);
+
+                        glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+                        glUniform1i(glGetUniformLocation(g_GpuProgramID, "object_id"), 4);
+                        glUniform1i(render_as_black_uniform, false);
+
+                        // Desenha as partes do diamante
+                        // Procura pelo objeto do diamante na cena virtual
+                        if (g_VirtualScene.count("rdmobj00")) 
+                        {
+                            SceneObject &obj = g_VirtualScene["rdmobj00"]; 
+                            glBindVertexArray(obj.vertex_array_object_id);
+                            glDrawElements(
+                                obj.rendering_mode,
+                                obj.num_indices,
+                                GL_UNSIGNED_INT,
+                                (void*)(obj.first_index * sizeof(GLuint))
+                            );
+                        }
+                    }
+                }
+            }
+            // Restaura o VAO do cenário
+            glBindVertexArray(vertex_array_object_id);
+        }
+
         // Desenha o labirinto com base no maze_map
         // (Substitui o loop for (int i = 1; i <= 3; ++i))
         for (int z = 0; z < MAP_HEIGHT; ++z)
@@ -865,15 +950,32 @@ int main()
             glm::mat4 pickaxe_view;
             glm::mat4 model;
 
-            // Calcular a rotação da animação (igual para ambos)
-            float swing_angle_rad = 0.0f;
+            // Calcular a animação usando Curva de Bézier Cúbica
+            glm::vec3 bezier_anim = glm::vec3(0.0f);
             if (g_IsSwinging)
             {
-                float max_swing_angle = glm::radians(-90.0f);
-                swing_angle_rad = sin(g_SwingAnimationTime) * max_swing_angle;
+                float t;
+                if (g_SwingAnimationTime <= 1.0f)
+                {
+                    // Ida: t vai de 0 a 1
+                    t = g_SwingAnimationTime;
+                    bezier_anim = BezierCubic(t, g_BezierP0, g_BezierP1, g_BezierP2, g_BezierP3);
+                }
+                else
+                {
+                    // Volta: t vai de 1 a 0 (invertido)
+                    t = 2.0f - g_SwingAnimationTime;
+                    bezier_anim = BezierCubic(t, g_BezierP0, g_BezierP1, g_BezierP2, g_BezierP3);
+                }
             }
             
-            glm::mat4 animation_rotation = Matrix_Rotate_X(swing_angle_rad);
+            // Aplica as transformações da curva de Bézier
+            // bezier_anim.x = rotação em X (swing principal)
+            // bezier_anim.y = rotação em Y (movimento lateral)
+            // bezier_anim.z = deslocamento em Z (avança/recua)
+            glm::mat4 animation_rotation = Matrix_Rotate_X(glm::radians(bezier_anim.x))
+                                         * Matrix_Rotate_Y(glm::radians(bezier_anim.y))
+                                         * Matrix_Translate(0.0f, 0.0f, bezier_anim.z);
 
             if (g_UseFreeCamera)
             {
@@ -1114,6 +1216,9 @@ void LoadShadersFromFiles()
     
     // Diz ao shader que "TextureImage3" deve ler da GL_TEXTURE3
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage3"), 3);
+    
+    // Diz ao shader que "TextureImage4" deve ler da GL_TEXTURE4
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage4"), 4);
     
     glUseProgram(0);
 

@@ -2425,7 +2425,7 @@
 	<stddef.h>
 	<stdint.h>
 
-1764539474 source:c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\src\main.cpp
+1764559265 source:c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\src\main.cpp
 	<cmath>
 	<cstdio>
 	<cstdlib>
@@ -2749,7 +2749,7 @@
 	<intrin.h>
 	<arm_neon.h>
 
-1764539455 c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\include\scene_builder.h
+1764542103 c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\include\scene_builder.h
 	<map>
 	<string>
 	<glad/glad.h>

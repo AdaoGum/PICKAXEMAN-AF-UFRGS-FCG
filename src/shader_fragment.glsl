@@ -14,6 +14,7 @@ uniform mat4 projection;
 #define OBJ_CUBE_FLOOR 1
 #define OBJ_PICKAXE    2
 #define OBJ_CEILING    3
+#define OBJ_DIAMOND    4
 
 uniform int object_id;
 uniform bool render_as_black;
@@ -25,6 +26,7 @@ uniform sampler2D TextureImage0; // Pedra
 uniform sampler2D TextureImage1; // Grama
 uniform sampler2D TextureImage2; // Madeira
 uniform sampler2D TextureImage3; // Teto (graystones)
+uniform sampler2D TextureImage4; // Diamante
 
 // Iluminação
 uniform vec4 bbox_min;
@@ -110,6 +112,13 @@ void main()
         V = position_world.z;
         tiling = 4.0;
     }
+    else if (object_id == OBJ_DIAMOND)
+    {
+        // Diamante - usa mapeamento triplanar (será processado depois)
+        U = 0.0;
+        V = 0.0;
+        tiling = 0.05; // Escala para o tamanho do diamante
+    }
     else 
     {
         // Picareta
@@ -125,11 +134,30 @@ void main()
         Kd = texture(TextureImage1, vec2(U, V) * tiling).rgb;
     else if (object_id == OBJ_CEILING)
         Kd = texture(TextureImage3, vec2(U, V) * tiling).rgb;
+    else if (object_id == OBJ_DIAMOND)
+    {
+        // Mapeamento Triplanar para o diamante
+        vec3 blending = abs(n.xyz);
+        blending = normalize(max(blending, 0.00001));
+        float b = (blending.x + blending.y + blending.z);
+        blending /= b;
+        
+        // Amostra a textura de 3 direções
+        vec3 xaxis = texture(TextureImage4, position_model.yz * tiling).rgb;
+        vec3 yaxis = texture(TextureImage4, position_model.xz * tiling).rgb;
+        vec3 zaxis = texture(TextureImage4, position_model.xy * tiling).rgb;
+        
+        // Mistura baseado na normal
+        Kd = xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
+    }
     else
         Kd = texture(TextureImage2, vec2(U, V)).rgb;
 
     // Iluminação Blinn-Phong
     vec3 Ks = vec3(0.1, 0.1, 0.1);
+    // Para o diamante, mais brilho especular
+    if (object_id == OBJ_DIAMOND)
+        Ks = vec3(0.5, 0.5, 0.5);
     float q = 10.0;
     vec3 Ka = Kd * 0.5; // Ambiente
     vec3 I = vec3(1.0, 1.0, 1.0); 

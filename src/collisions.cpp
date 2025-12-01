@@ -6,8 +6,9 @@
 // 0 = EMPTY (espaço vazio)
 // 1 = WALL (parede intacta)
 // 2 = DAMAGED_WALL (parede danificada - aparece vermelha)
+// 3 = DIAMOND (diamante coletável)
 int maze_map[MAP_HEIGHT][MAP_WIDTH] = {
-    {1,1,1,1,1,1,1,1,1,1},
+    {1,1,1,1,1,3,1,1,1,1},
     {1,0,0,0,0,0,0,0,0,1},
     {1,0,1,1,0,1,1,1,0,1},
     {1,0,1,0,0,0,1,0,0,1},
