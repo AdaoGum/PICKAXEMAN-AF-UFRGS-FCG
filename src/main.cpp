@@ -374,7 +374,7 @@ float g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
 float g_CameraPhi = 0.0f;   // Ângulo em relação ao eixo Y
 float g_CameraDistance = 2.5f; // Distância da câmera para a origem
 
-glm::vec4 g_CameraPosition     = glm::vec4(-4.0f, 0.0f, -4.0f, 1.0f); // Posição inicial da câmera
+glm::vec4 g_CameraPosition     = glm::vec4(-5.0f, 0.0f, -5.0f, 1.0f); // Posição inicial da câmera
 glm::vec4 g_CameraViewVector   = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f); // Vetor "view", para onde a câmera está virada
 glm::vec4 g_CameraUpVector     = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f); // Vetor "up"
 
@@ -911,6 +911,15 @@ int main()
                     }
                 }
             }
+        }
+
+        int player_grid_x = (int)(g_CameraPosition.x + (float)MAP_WIDTH / 2.0f + 0.5f);
+        int player_grid_z = (int)(g_CameraPosition.z + (float)MAP_HEIGHT / 2.0f + 0.5f);
+
+        if (maze_map[player_grid_z][player_grid_x] == DIAMOND)
+        {
+            maze_map[player_grid_z][player_grid_x] = EMPTY;
+            printf("Diamante coletado!\n");            
         }
 
         // Agora queremos desenhar os eixos XYZ de coordenadas GLOBAIS.
