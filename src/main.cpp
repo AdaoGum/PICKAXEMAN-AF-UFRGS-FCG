@@ -424,13 +424,6 @@ const glm::vec3 g_BezierP3 = glm::vec3(-90.0f, 0.0f, -0.2f);   // Golpe final
 float g_DeltaTime = 0.0f;
 float g_LastFrameTime = 0.0f;
 
-// Enum para tipos de células do mapa
-// EMPTY = espaço vazio (pode andar)
-// WALL = parede intacta (colide e pode ser danificada)
-// DAMAGED_WALL = parede danificada (colide, aparece vermelha, próximo golpe destrói)
-// DIAMOND = diamante
-enum MapType { EMPTY = 0, WALL = 1, DAMAGED_WALL = 2, DIAMOND = 3 };
-
 GLuint g_TextureIdStone = 0;
 GLuint g_TextureIdGrass = 0;
 GLuint g_TextureIdWood = 0;
@@ -1521,40 +1514,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
             // Reseta a animação
             g_SwingAnimationTime = 0.0f;
 
-            // *** LÓGICA DE QUEBRAR PAREDES ***
-            // Calcula a posição do bloco à frente da câmera
-            // Usamos um raio de alcance para verificar onde o jogador está olhando
-            float reach_distance = 1.5f; // Distância de alcance da picareta
-
-            // Direção que o jogador está olhando (sem componente Y para simplificar)
-            glm::vec4 look_direction = glm::vec4(g_CameraViewVector.x, 0.0f, g_CameraViewVector.z, 0.0f);
-            if (length(look_direction) > 0.0f)
-                look_direction = normalize(look_direction);
-
-            // Posição do bloco à frente
-            float target_x = g_CameraPosition.x + look_direction.x * reach_distance;
-            float target_z = g_CameraPosition.z + look_direction.z * reach_distance;
-
-            // Converte coordenadas de mundo para índices do mapa
-            int grid_x = (int)(target_x + (float)MAP_WIDTH / 2.0f + 0.5f);
-            int grid_z = (int)(target_z + (float)MAP_HEIGHT / 2.0f + 0.5f);
-
-            // Verifica se está dentro dos limites do mapa
-            if (grid_x >= 0 && grid_x < MAP_WIDTH && grid_z >= 0 && grid_z < MAP_HEIGHT)
-            {
-                // Lógica de dano progressivo:
-                // WALL (1) => DAMAGED_WALL (2) = > EMPTY (0)
-                if (maze_map[grid_z][grid_x] == WALL)
-                {
-                    maze_map[grid_z][grid_x] = DAMAGED_WALL;
-                    printf("Parede danificada em (%d, %d)!\n", grid_x, grid_z);
-                }
-                else if (maze_map[grid_z][grid_x] == DAMAGED_WALL)
-                {
-                    maze_map[grid_z][grid_x] = EMPTY;
-                    printf("Parede destruida em (%d, %d)!\n", grid_x, grid_z);
-                }
-            }
+            CheckMapCollisionAndBreak(g_CameraPosition, g_CameraViewVector);
         }
     }
 

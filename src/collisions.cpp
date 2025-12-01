@@ -1,6 +1,11 @@
 // collisions.cpp
 #include "collisions.h"
 #include <cmath> 
+#include "collisions.h"
+#include <cmath>
+#include <cstdio>
+#include <algorithm>
+#include <glm/geometric.hpp> 
 
 // Definição do mapa
 // 0 = EMPTY (espaço vazio)
@@ -65,4 +70,40 @@ bool CheckCollision(float x, float z)
         }
     }
     return false;
+}
+
+void CheckMapCollisionAndBreak(glm::vec4 camera_position, glm::vec4 view_vector)
+{
+    // Distância de alcance da picareta
+    float reach_distance = 1.5f; 
+
+    // Direção que o jogador está olhando (sem componente Y para simplificar o acerto no grid)
+    glm::vec4 look_direction = glm::vec4(view_vector.x, 0.0f, view_vector.z, 0.0f);
+    
+    if (glm::length(look_direction) > 0.0f)
+        look_direction = glm::normalize(look_direction);
+
+    // Posição do bloco à frente (Origem + Direção * Distância)
+    float target_x = camera_position.x + look_direction.x * reach_distance;
+    float target_z = camera_position.z + look_direction.z * reach_distance;
+
+    // Converte coordenadas de mundo para índices do mapa
+    int grid_x = (int)(target_x + (float)MAP_WIDTH / 2.0f + 0.5f);
+    int grid_z = (int)(target_z + (float)MAP_HEIGHT / 2.0f + 0.5f);
+
+    // Verifica se o índice é válido
+    if (grid_x >= 0 && grid_x < MAP_WIDTH && grid_z >= 0 && grid_z < MAP_HEIGHT)
+    {
+        // Lógica de dano progressivo
+        if (maze_map[grid_z][grid_x] == WALL)
+        {
+            maze_map[grid_z][grid_x] = DAMAGED_WALL;
+            printf("Parede danificada em (%d, %d)!\n", grid_x, grid_z);
+        }
+        else if (maze_map[grid_z][grid_x] == DAMAGED_WALL)
+        {
+            maze_map[grid_z][grid_x] = EMPTY;
+            printf("Parede destruida em (%d, %d)!\n", grid_x, grid_z);
+        }
+    }
 }
