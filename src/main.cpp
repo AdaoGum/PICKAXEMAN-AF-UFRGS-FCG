@@ -906,14 +906,7 @@ int main()
             }
         }
 
-        int player_grid_x = (int)(g_CameraPosition.x + (float)MAP_WIDTH / 2.0f + 0.5f);
-        int player_grid_z = (int)(g_CameraPosition.z + (float)MAP_HEIGHT / 2.0f + 0.5f);
-
-        if (maze_map[player_grid_z][player_grid_x] == DIAMOND)
-        {
-            maze_map[player_grid_z][player_grid_x] = EMPTY;
-            printf("Diamante coletado!\n");            
-        }
+        CheckDiamondCollision(g_CameraPosition);
 
         // Agora queremos desenhar os eixos XYZ de coordenadas GLOBAIS.
         // Para tanto, colocamos a matriz de modelagem igual à identidade.

@@ -107,3 +107,28 @@ void CheckMapCollisionAndBreak(glm::vec4 camera_position, glm::vec4 view_vector)
         }
     }
 }
+
+void CheckDiamondCollision(glm::vec4 camera_position)
+{
+    // Convertendo posição do mundo (float) para índice da matriz (int).
+    // O +0.5f é para garantir o arredondamento correto para o centro do tile
+    int player_grid_x = (int)(camera_position.x + (float)MAP_WIDTH / 2.0f + 0.5f);
+    int player_grid_z = (int)(camera_position.z + (float)MAP_HEIGHT / 2.0f + 0.5f);
+
+    // Verifica se os índices são válidos para evitar acessar memória fora da matriz
+    if (player_grid_x >= 0 && player_grid_x < MAP_WIDTH && 
+        player_grid_z >= 0 && player_grid_z < MAP_HEIGHT)
+    {
+        // Se o bloco onde o jogador está é um DIAMANTE
+        if (maze_map[player_grid_z][player_grid_x] == DIAMOND)
+        {
+            // Remove o diamante do mapa
+            maze_map[player_grid_z][player_grid_x] = EMPTY;
+            
+            // Feedback para o jogador
+            printf("Diamante coletado! (+100 pontos)\n");
+            
+            // Aqui você poderia tocar um som ou incrementar uma variável de score global
+        }
+    }
+}

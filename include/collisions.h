@@ -16,5 +16,6 @@ extern int maze_map[MAP_HEIGHT][MAP_WIDTH];
 // Funções
 bool CheckCollision(float x, float z); // Colisão física (andar)
 void CheckMapCollisionAndBreak(glm::vec4 camera_position, glm::vec4 view_vector); // Ray-Casting (quebrar)
+void CheckDiamondCollision(glm::vec4 camera_position);
 
 #endif // COLLISIONS_H
