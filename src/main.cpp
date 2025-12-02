@@ -47,7 +47,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
-#define STB_IMAGE_IMPLEMENTATION 
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 // Declaração de várias funções utilizadas em main().  Essas estão definidas
@@ -64,7 +64,7 @@ GLuint LoadTextureImage(const char* filename); // Função que carrega imagens d
 void TextRendering_Init();
 float TextRendering_LineHeight(GLFWwindow* window);
 float TextRendering_CharWidth(GLFWwindow* window);
-void TextRendering_PrintString(GLFWwindow* window, const std::string &str, float x, float y, float scale = 1.0f);
+void TextRendering_PrintString(GLFWwindow* window, const std::string& str, float x, float y, float scale = 1.0f);
 void TextRendering_PrintMatrix(GLFWwindow* window, glm::mat4 M, float x, float y, float scale = 1.0f);
 void TextRendering_PrintVector(GLFWwindow* window, glm::vec4 v, float x, float y, float scale = 1.0f);
 void TextRendering_PrintMatrixVectorProduct(GLFWwindow* window, glm::mat4 M, glm::vec4 v, float x, float y, float scale = 1.0f);
@@ -105,7 +105,7 @@ struct ObjModel
             auto i = fullpath.find_last_of("/");
             if (i != std::string::npos)
             {
-                dirname = fullpath.substr(0, i+1);
+                dirname = fullpath.substr(0, i + 1);
                 basepath = dirname.c_str();
             }
         }
@@ -140,13 +140,13 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model);
 // Função que computa as normais (Copiada do Lab 5)
 void ComputeNormals(ObjModel* model)
 {
-    if ( !model->attrib.normals.empty() )
+    if (!model->attrib.normals.empty())
         return;
 
     size_t num_vertices = model->attrib.vertices.size() / 3;
 
     std::vector<int> num_triangles_per_vertex(num_vertices, 0);
-    std::vector<glm::vec4> vertex_normals(num_vertices, glm::vec4(0.0f,0.0f,0.0f,0.0f));
+    std::vector<glm::vec4> vertex_normals(num_vertices, glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 
     for (size_t shape = 0; shape < model->shapes.size(); ++shape)
     {
@@ -157,37 +157,37 @@ void ComputeNormals(ObjModel* model)
             glm::vec4  vertices[3];
             for (size_t vertex = 0; vertex < 3; ++vertex)
             {
-                tinyobj::index_t idx = model->shapes[shape].mesh.indices[3*triangle + vertex];
-                const float vx = model->attrib.vertices[3*idx.vertex_index + 0];
-                const float vy = model->attrib.vertices[3*idx.vertex_index + 1];
-                const float vz = model->attrib.vertices[3*idx.vertex_index + 2];
-                vertices[vertex] = glm::vec4(vx,vy,vz,1.0);
+                tinyobj::index_t idx = model->shapes[shape].mesh.indices[3 * triangle + vertex];
+                const float vx = model->attrib.vertices[3 * idx.vertex_index + 0];
+                const float vy = model->attrib.vertices[3 * idx.vertex_index + 1];
+                const float vz = model->attrib.vertices[3 * idx.vertex_index + 2];
+                vertices[vertex] = glm::vec4(vx, vy, vz, 1.0);
             }
 
             const glm::vec4  a = vertices[0];
             const glm::vec4  b = vertices[1];
             const glm::vec4  c = vertices[2];
 
-            const glm::vec4  n = crossproduct(b-a,c-a);
+            const glm::vec4  n = crossproduct(b - a, c - a);
 
             for (size_t vertex = 0; vertex < 3; ++vertex)
             {
-                tinyobj::index_t idx = model->shapes[shape].mesh.indices[3*triangle + vertex];
+                tinyobj::index_t idx = model->shapes[shape].mesh.indices[3 * triangle + vertex];
                 num_triangles_per_vertex[idx.vertex_index] += 1;
                 vertex_normals[idx.vertex_index] += n;
             }
         }
     }
 
-    model->attrib.normals.resize( 3*num_vertices );
+    model->attrib.normals.resize(3 * num_vertices);
 
     for (size_t i = 0; i < vertex_normals.size(); ++i)
     {
         glm::vec4 n = vertex_normals[i] / (float)num_triangles_per_vertex[i];
         n /= norm(n);
-        model->attrib.normals[3*i + 0] = n.x;
-        model->attrib.normals[3*i + 1] = n.y;
-        model->attrib.normals[3*i + 2] = n.z;
+        model->attrib.normals[3 * i + 0] = n.x;
+        model->attrib.normals[3 * i + 1] = n.y;
+        model->attrib.normals[3 * i + 2] = n.z;
     }
 }
 
@@ -211,25 +211,25 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
         const float minval = std::numeric_limits<float>::min();
         const float maxval = std::numeric_limits<float>::max();
 
-        glm::vec3 bbox_min = glm::vec3(maxval,maxval,maxval);
-        glm::vec3 bbox_max = glm::vec3(minval,minval,minval);
+        glm::vec3 bbox_min = glm::vec3(maxval, maxval, maxval);
+        glm::vec3 bbox_max = glm::vec3(minval, minval, minval);
 
         for (size_t triangle = 0; triangle < num_triangles; ++triangle)
         {
             for (size_t vertex = 0; vertex < 3; ++vertex)
             {
-                tinyobj::index_t idx = model->shapes[shape].mesh.indices[3*triangle + vertex];
+                tinyobj::index_t idx = model->shapes[shape].mesh.indices[3 * triangle + vertex];
 
-                indices.push_back(first_index + 3*triangle + vertex);
+                indices.push_back(first_index + 3 * triangle + vertex);
 
-                const float vx = model->attrib.vertices[3*idx.vertex_index + 0];
-                const float vy = model->attrib.vertices[3*idx.vertex_index + 1];
-                const float vz = model->attrib.vertices[3*idx.vertex_index + 2];
-                
-                model_coefficients.push_back( vx ); // X
-                model_coefficients.push_back( vy ); // Y
-                model_coefficients.push_back( vz ); // Z
-                model_coefficients.push_back( 1.0f ); // W
+                const float vx = model->attrib.vertices[3 * idx.vertex_index + 0];
+                const float vy = model->attrib.vertices[3 * idx.vertex_index + 1];
+                const float vz = model->attrib.vertices[3 * idx.vertex_index + 2];
+
+                model_coefficients.push_back(vx); // X
+                model_coefficients.push_back(vy); // Y
+                model_coefficients.push_back(vz); // Z
+                model_coefficients.push_back(1.0f); // W
 
                 bbox_min.x = std::min(bbox_min.x, vx);
                 bbox_min.y = std::min(bbox_min.y, vy);
@@ -239,23 +239,23 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
                 bbox_max.z = std::max(bbox_max.z, vz);
 
                 // Se existirem normais, carregamos elas
-                if ( idx.normal_index != -1 )
+                if (idx.normal_index != -1)
                 {
-                    const float nx = model->attrib.normals[3*idx.normal_index + 0];
-                    const float ny = model->attrib.normals[3*idx.normal_index + 1];
-                    const float nz = model->attrib.normals[3*idx.normal_index + 2];
-                    normal_coefficients.push_back( nx ); // X
-                    normal_coefficients.push_back( ny ); // Y
-                    normal_coefficients.push_back( nz ); // Z
-                    normal_coefficients.push_back( 0.0f ); // W
+                    const float nx = model->attrib.normals[3 * idx.normal_index + 0];
+                    const float ny = model->attrib.normals[3 * idx.normal_index + 1];
+                    const float nz = model->attrib.normals[3 * idx.normal_index + 2];
+                    normal_coefficients.push_back(nx); // X
+                    normal_coefficients.push_back(ny); // Y
+                    normal_coefficients.push_back(nz); // Z
+                    normal_coefficients.push_back(0.0f); // W
                 }
             }
         }
 
         SceneObject theobject;
-        theobject.name           = model->shapes[shape].name;
-        theobject.first_index    = first_index; 
-        theobject.num_indices    = indices.size() - first_index; 
+        theobject.name = model->shapes[shape].name;
+        theobject.first_index = first_index;
+        theobject.num_indices = indices.size() - first_index;
         theobject.rendering_mode = GL_TRIANGLES;
         theobject.vertex_array_object_id = vertex_array_object_id;
         theobject.bbox_min = bbox_min;
@@ -272,14 +272,14 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(0);
 
-    if ( !normal_coefficients.empty() )
+    if (!normal_coefficients.empty())
     {
         GLuint VBO_normal_coefficients_id;
         glGenBuffers(1, &VBO_normal_coefficients_id);
         glBindBuffer(GL_ARRAY_BUFFER, VBO_normal_coefficients_id);
         glBufferData(GL_ARRAY_BUFFER, normal_coefficients.size() * sizeof(float), NULL, GL_STATIC_DRAW);
         glBufferSubData(GL_ARRAY_BUFFER, 0, normal_coefficients.size() * sizeof(float), normal_coefficients.data());
-        
+
         // ADAPTAÇÃO: Usamos location = 1 para as normais
         // Isso permite que o shader atual use as normais como "cor"
         glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
@@ -307,9 +307,9 @@ GLuint LoadTextureImage(const char* filename)
     int width;
     int height;
     int channels;
-    unsigned char *data = stbi_load(filename, &width, &height, &channels, 3);
+    unsigned char* data = stbi_load(filename, &width, &height, &channels, 3);
 
-    if ( data == NULL )
+    if (data == NULL)
     {
         fprintf(stderr, "ERROR: Cannot open image file \"%s\".\n", filename);
         std::exit(EXIT_FAILURE);
@@ -324,7 +324,7 @@ GLuint LoadTextureImage(const char* filename)
     glGenSamplers(1, &sampler_id);
 
     // Veja slides 95-96 do documento Aula_20_Mapeamento_de_Texturas.pdf
-    glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_S, GL_REPEAT); 
+    glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     // Parâmetros de amostragem da textura.
@@ -348,7 +348,7 @@ GLuint LoadTextureImage(const char* filename)
 
     g_NumLoadedTextures += 1;
 
-    return texture_id; 
+    return texture_id;
 }
 
 
@@ -410,7 +410,7 @@ glm::vec3 BezierCubic(float t, glm::vec3 P0, glm::vec3 P1, glm::vec3 P2, glm::ve
     point += 3.0f * t * (1.0f - t) * (1.0f - t) * P1;             // 3t(1-t)^2 * P1
     point += 3.0f * t * t * (1.0f - t) * P2;             // 3t^2(1-t) * P2
     point += t * t * t * P3;                        // t^3 * P3
-    
+
     return point;
 }
 
@@ -473,30 +473,31 @@ void ResetGame()
     g_GameOver = false;
     g_Victory = false;
     g_GameStartTime = (float)glfwGetTime();
-    
+
     // Reseta pontuação
     g_DiamondsCollected = 0;
     g_Score = 0;
-    
+
     // Reseta anti-cheater
     g_IsOutOfBounds = false;
     g_OutOfBoundsStartTime = 0.0f;
-    
+
     // Reseta posição e orientação da câmera
     g_CameraTheta = 0.0f;
     g_CameraPhi = 0.0f;
     g_CameraDistance = 2.5f;
-    g_CameraPosition     = glm::vec4(-5.0f, 0.0f, -5.0f, 1.0f); // Posição inicial da câmera
-    g_CameraViewVector   = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f); // Vetor "view", para onde a câmera está virada
-    g_CameraUpVector     = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f); // Vetor "up"
+    g_CameraPosition = glm::vec4(-5.0f, 0.0f, -5.0f, 1.0f); // Posição inicial da câmera
+    g_CameraViewVector = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f); // Vetor "view", para onde a câmera está virada
+    g_CameraUpVector = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f); // Vetor "up"
     g_CameraYaw = -90.0f;
     g_CameraPitch = 0.0f;
-    
+
     // Reseta animação da picareta
     g_IsSwinging = false;
     g_SwingAnimationTime = 0.0f;
-    
+
     // Variável que controla o tipo de projeção utilizada: perspectiva ou ortográfica.
+    //TODO: verificar uso
     bool g_UsePerspectiveProjection = true;
 
     // Reseta teclas pressionadas
@@ -528,9 +529,9 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
-    #ifdef __APPLE__
+#ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    #endif
+#endif
 
     // Pedimos para utilizar o perfil "core", isto é, utilizaremos somente as
     // funções modernas de OpenGL.
@@ -563,20 +564,20 @@ int main()
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
     glfwSetWindowSize(window, 800, 800); // Forçamos a chamada do callback acima, para definir g_ScreenRatio.
 
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Indicamos que as chamadas OpenGL deverão renderizar nesta janela
     glfwMakeContextCurrent(window);
 
     // Carregamento de todas funções definidas por OpenGL 3.3, utilizando a
     // biblioteca GLAD.
-    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
     // Imprimimos no terminal informações sobre a GPU do sistema
-    const GLubyte *vendor      = glGetString(GL_VENDOR);
-    const GLubyte *renderer    = glGetString(GL_RENDERER);
-    const GLubyte *glversion   = glGetString(GL_VERSION);
-    const GLubyte *glslversion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+    const GLubyte* vendor = glGetString(GL_VENDOR);
+    const GLubyte* renderer = glGetString(GL_RENDERER);
+    const GLubyte* glversion = glGetString(GL_VERSION);
+    const GLubyte* glslversion = glGetString(GL_SHADING_LANGUAGE_VERSION);
 
     printf("GPU: %s, %s, OpenGL %s, GLSL %s\n", vendor, renderer, glversion, glslversion);
 
@@ -592,15 +593,15 @@ int main()
     TextRendering_Init();
 
     // CARREGAMENTO DO OBJ (Picareta) USANDO CLASSE DO LAB 5
-    ObjModel pickaxeModel("../../data/obj/pickaxe.obj"); 
+    ObjModel pickaxeModel("../../data/obj/pickaxe.obj");
     ComputeNormals(&pickaxeModel);
     BuildTrianglesAndAddToVirtualScene(&pickaxeModel);
 
     // CARREGAMENTO DO OBJ (Diamante)
-    ObjModel diamondModel("../../data/obj/diamond.obj"); 
+    ObjModel diamondModel("../../data/obj/diamond.obj");
     ComputeNormals(&diamondModel);
     BuildTrianglesAndAddToVirtualScene(&diamondModel);
-    
+
     // Debug: mostra os nomes dos objetos carregados
     printf("Objetos na cena virtual:\n");
     for (auto& pair : g_VirtualScene) {
@@ -610,9 +611,9 @@ int main()
     // Buscamos o endereço das variáveis definidas dentro do Vertex Shader.
     // Utilizaremos estas variáveis para enviar dados para a placa de vídeo
     // (GPU)! Veja arquivo "shader_vertex.glsl".
-    GLint model_uniform           = glGetUniformLocation(g_GpuProgramID, "model"); // Variável da matriz "model"
-    GLint view_uniform            = glGetUniformLocation(g_GpuProgramID, "view"); // Variável da matriz "view" em shader_vertex.glsl
-    GLint projection_uniform      = glGetUniformLocation(g_GpuProgramID, "projection"); // Variável da matriz "projection" em shader_vertex.glsl
+    GLint model_uniform = glGetUniformLocation(g_GpuProgramID, "model"); // Variável da matriz "model"
+    GLint view_uniform = glGetUniformLocation(g_GpuProgramID, "view"); // Variável da matriz "view" em shader_vertex.glsl
+    GLint projection_uniform = glGetUniformLocation(g_GpuProgramID, "projection"); // Variável da matriz "projection" em shader_vertex.glsl
     GLint render_as_black_uniform = glGetUniformLocation(g_GpuProgramID, "render_as_black"); // Variável booleana em shader_vertex.glsl
 
     // Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
@@ -624,7 +625,7 @@ int main()
     glm::mat4 the_model;
     glm::mat4 the_view;
 
-    
+
 
     // Inicializa o g_LastFrameTime antes do loop
     g_LastFrameTime = (float)glfwGetTime();
@@ -651,7 +652,7 @@ int main()
 
             // Preara a string dependendo do resultado do jogo
             std::string endMessage = g_GameOver ? "GAME OVER!" : "PARABENS! VOCE VENCEU!";
-            
+
             // Printa as mensagens de fim de jogo
             TextRendering_PrintString(window, endMessage, -0.5f, 0.8f, 2.5f);
             TextRendering_PrintString(window, "Pressione R para jogar novamente", -0.5f, 0.2f, 1.5f);
@@ -759,7 +760,7 @@ int main()
 
         // Calcular vetores de direção SEM componente Y
         //glm::vec4 forward_vector = glm::vec4(g_CameraViewVector.x, 0.0f, g_CameraViewVector.z, 0.0f);
-        
+
         glm::vec4 forward_vector;
 
         if (g_UseFreeCamera)
@@ -772,16 +773,16 @@ int main()
             // Modo Look-At: Usa o ângulo Yaw do personagem
             // Isso garante que ele ande na direção que está virado
             float angle = glm::radians(g_CameraYaw);
-            
+
             // Calculamos o vetor (X, Z) baseado no ângulo
             // Nota: Se o personagem andar de costas, inverta os sinais (-cos, -sin)
             forward_vector = glm::vec4(-cos(angle), 0.0f, sin(angle), 0.0f);
         }
-        
-        
+
+
         if (length(forward_vector) > 0.0f) // Evita divisão por zero
             forward_vector = normalize(forward_vector);
-        
+
         // Vetor Direita (Right) - Já é paralelo ao chão geralmente, mas garantimos
         glm::vec4 right_vector = crossproduct(forward_vector, glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
 
@@ -812,21 +813,21 @@ int main()
             {
                 g_CameraPosition.z = new_z;
             }
-            
+
             // Forçamos Y a ser sempre 0.0 (altura dos olhos ajustada se necessário)
-            // Se quiser que a câmera fique na altura de uma pessoa (ex: 0.0 é o chão), 
+            // Se quiser que a câmera fique na altura de uma pessoa (ex: 0.0 é o chão),
             // você pode somar uma constante na View Matrix ou manter g_CameraPosition.y fixo aqui.
-            g_CameraPosition.y = 0.0f; 
+            g_CameraPosition.y = 0.0f;
         }
 
-        glm::mat4 view;        
+        glm::mat4 view;
 
         if (g_UseFreeCamera)
         {
             // Modo FPS: A câmera está na posição do jogador e olha para g_CameraViewVector
             // Adicionamos +0.5 no Y para simular a altura dos olhos do boneco
             glm::vec4 camera_eye = g_CameraPosition + glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-            
+
             view = Matrix_Camera_View(camera_eye, g_CameraViewVector, g_CameraUpVector);
         }
         else
@@ -838,7 +839,7 @@ int main()
             float x = r * cos(g_CameraPhi) * sin(g_CameraTheta);
 
             // Posição do alvo (Cabeça do jogador)
-            glm::vec4 camera_lookat_point = g_CameraPosition + glm::vec4(0.0f, 1.0f, 0.0f, 0.0f); 
+            glm::vec4 camera_lookat_point = g_CameraPosition + glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
 
             // Posição da câmera (Deslocada em relação ao alvo)
             glm::vec4 camera_view_point = camera_lookat_point + glm::vec4(x, y, z, 0.0f);
@@ -850,10 +851,10 @@ int main()
         }
 
         the_view = view;
-        
+
         glm::mat4 projection;
-        float nearplane = -0.1f; 
-        float farplane  = -20.0f; 
+        float nearplane = -0.1f;
+        float farplane = -20.0f;
 
         if (g_UsePerspectiveProjection)
         {
@@ -862,15 +863,15 @@ int main()
         }
         else
         {
-            float t = 1.5f*g_CameraDistance/2.5f;
+            float t = 1.5f * g_CameraDistance / 2.5f;
             float b = -t;
-            float r = t*g_ScreenRatio;
+            float r = t * g_ScreenRatio;
             float l = -r;
             projection = Matrix_Orthographic(l, r, b, t, nearplane, farplane);
         }
 
-        glUniformMatrix4fv(view_uniform       , 1 , GL_FALSE , glm::value_ptr(view));
-        glUniformMatrix4fv(projection_uniform , 1 , GL_FALSE , glm::value_ptr(projection));
+        glUniformMatrix4fv(view_uniform, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(projection_uniform, 1, GL_FALSE, glm::value_ptr(projection));
 
         // Desenha o chão
         {
@@ -878,7 +879,7 @@ int main()
             the_model = model; // Salva para o texto
 
             glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-            glUniform1i(glGetUniformLocation(g_GpuProgramID, "object_id"), 1); 
+            glUniform1i(glGetUniformLocation(g_GpuProgramID, "object_id"), 1);
 
             glDrawElements(
                 g_VirtualScene["floor"].rendering_mode,
@@ -922,11 +923,11 @@ int main()
                         // Posição do diamante (um pouco acima do chão)
                         // Rotação X de 90 graus para ficar em pé
                         glm::mat4 model = Matrix_Translate(pos_x, 0.2f, pos_z)
-                                        * Matrix_Rotate_Y(diamond_rotation)
-                                        // Gira e deixa em pé
-                                        * Matrix_Rotate_X(glm::radians(-90.0f))
-                                        // Diminuiu o tamanho do diamante
-                                        * Matrix_Scale(0.007f, 0.007f, 0.007f);
+                            * Matrix_Rotate_Y(diamond_rotation)
+                            // Gira e deixa em pé
+                            * Matrix_Rotate_X(glm::radians(-90.0f))
+                            // Diminuiu o tamanho do diamante
+                            * Matrix_Scale(0.007f, 0.007f, 0.007f);
 
                         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
                         glUniform1i(glGetUniformLocation(g_GpuProgramID, "object_id"), 4);
@@ -934,9 +935,9 @@ int main()
 
                         // Desenha as partes do diamante
                         // Procura pelo objeto do diamante na cena virtual
-                        if (g_VirtualScene.count("rdmobj00")) 
+                        if (g_VirtualScene.count("rdmobj00"))
                         {
-                            SceneObject &obj = g_VirtualScene["rdmobj00"]; 
+                            SceneObject& obj = g_VirtualScene["rdmobj00"];
                             glBindVertexArray(obj.vertex_array_object_id);
                             glDrawElements(
                                 obj.rendering_mode,
@@ -983,8 +984,8 @@ int main()
                         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 
                         // Envia flag is_damaged para o shader (1 = danificada, 0 = intacta)
-                        glUniform1i(glGetUniformLocation(g_GpuProgramID, "is_damaged"), 
-                                    (maze_map[z][x] == DAMAGED_WALL) ? 1 : 0);
+                        glUniform1i(glGetUniformLocation(g_GpuProgramID, "is_damaged"),
+                            (maze_map[z][x] == DAMAGED_WALL) ? 1 : 0);
 
                         // Desenha as faces coloridas
                         glUniform1i(glGetUniformLocation(g_GpuProgramID, "object_id"), 0);
@@ -1017,9 +1018,9 @@ int main()
 
         // Correção do primeiro bug de pontuação: Verifica se o jogador está dentro dos limites do mapa
         // Verifica se está dentro dos limites do mapa antes de checar diamante
-        bool isInsideMap = (player_grid_x >= 0 && player_grid_x < MAP_WIDTH && 
-                           player_grid_z >= 0 && player_grid_z < MAP_HEIGHT);
-        
+        bool isInsideMap = (player_grid_x >= 0 && player_grid_x < MAP_WIDTH &&
+            player_grid_z >= 0 && player_grid_z < MAP_HEIGHT);
+
         if (isInsideMap)
         {
             // Jogador voltou para dentro do mapa
@@ -1027,14 +1028,14 @@ int main()
                 g_IsOutOfBounds = false;
                 printf("Jogador voltou para dentro do mapa!\n");
             }
-            
+
             // Verifica coleta de diamante usando a função de colisão
             if (!g_GameOver && !g_Victory && CheckDiamondCollision(g_CameraPosition))
             {
                 g_DiamondsCollected++;
                 g_Score += DIAMOND_POINTS;
                 printf("Total: %d | Pontos: %d\n", g_DiamondsCollected, g_Score);
-                
+
                 // Verifica condição de vitória
                 if (g_DiamondsCollected >= DIAMONDS_TO_WIN)
                 {
@@ -1045,7 +1046,7 @@ int main()
                     printf("VITORIA! Pontuacao final: %d (bonus de tempo: %d)\n", g_Score, (int)timeRemaining);
                 }
             }
-        } 
+        }
         else if (!g_GameOver && !g_Victory)
         {
             // Jogador está fora dos limites do mapa (CHEATER!)
@@ -1055,16 +1056,17 @@ int main()
                 g_OutOfBoundsStartTime = currentFrameTime;
                 printf("AVISO: Jogador saiu dos limites do mapa! Posicao: (%d, %d)\n", player_grid_x, player_grid_z);
             }
-            
+
             // Calcula tempo restante antes do Game Over
             float timeOutOfBounds = currentFrameTime - g_OutOfBoundsStartTime;
             float cheaterTimeRemaining = g_OutOfBoundsTimeLimit - timeOutOfBounds;
-            
+
             if (cheaterTimeRemaining <= 0) {
                 // Tempo esgotado - GAME OVER por cheating
                 g_GameOver = true;
                 printf("GAME OVER! Voce ficou muito tempo fora do mapa (CHEATER!)\n");
-            } else {
+            }
+            else {
                 // Aviso no terminal a cada segundo
                 static int lastSecond = -1;
                 int currentSecond = (int)cheaterTimeRemaining;
@@ -1130,14 +1132,14 @@ int main()
                     bezier_anim = BezierCubic(t, g_BezierP0, g_BezierP1, g_BezierP2, g_BezierP3);
                 }
             }
-            
+
             // Aplica as transformações da curva de Bézier
             // bezier_anim.x = rotação em X (swing principal)
             // bezier_anim.y = rotação em Y (movimento lateral)
             // bezier_anim.z = deslocamento em Z (avança/recua)
             glm::mat4 animation_rotation = Matrix_Rotate_X(glm::radians(bezier_anim.x))
-                                         * Matrix_Rotate_Y(glm::radians(bezier_anim.y))
-                                         * Matrix_Translate(0.0f, 0.0f, bezier_anim.z);
+                * Matrix_Rotate_Y(glm::radians(bezier_anim.y))
+                * Matrix_Translate(0.0f, 0.0f, bezier_anim.z);
 
             if (g_UseFreeCamera)
             {
@@ -1145,14 +1147,14 @@ int main()
                 // A picareta fica fixa na tela.
                 // A View é a identidade.
                 pickaxe_view = Matrix_Identity();
-                
+
                 // Posição fixa na frente da "tela"
-                model = Matrix_Translate(0.5f, -0.5f, -1.0f) 
-                      * animation_rotation 
-                      * Matrix_Rotate_Y(glm::radians(180.0f)) // Ajuste para a ponta ficar para frente
-                      * Matrix_Rotate_X(glm::radians(270.0f))
-                      * Matrix_Rotate_Z(glm::radians(180.0f))
-                      * Matrix_Scale(1.0f, 1.0f, 1.0f);
+                model = Matrix_Translate(0.5f, -0.5f, -1.0f)
+                    * animation_rotation
+                    * Matrix_Rotate_Y(glm::radians(180.0f)) // Ajuste para a ponta ficar para frente
+                    * Matrix_Rotate_X(glm::radians(270.0f))
+                    * Matrix_Rotate_Z(glm::radians(180.0f))
+                    * Matrix_Scale(1.0f, 1.0f, 1.0f);
             }
             else
             {
@@ -1163,12 +1165,12 @@ int main()
 
                 // Posição no mundo (g_CameraPosition)
                 // Rotação: Usamos g_CameraYaw para alinhar com onde o jogador estava olhando
-                model = Matrix_Translate(g_CameraPosition.x, g_CameraPosition.y-0.5f, g_CameraPosition.z) * Matrix_Rotate_Y(glm::radians(g_CameraYaw + 90.f)) 
-                      * animation_rotation
-                      * Matrix_Rotate_Y(glm::radians(180.0f))
-                      * Matrix_Rotate_X(glm::radians(270.0f))
-                      * Matrix_Rotate_Z(glm::radians(180.0f))
-                      * Matrix_Scale(1.0f, 1.0f, 1.0f);
+                model = Matrix_Translate(g_CameraPosition.x, g_CameraPosition.y - 0.5f, g_CameraPosition.z) * Matrix_Rotate_Y(glm::radians(g_CameraYaw + 90.f))
+                    * animation_rotation
+                    * Matrix_Rotate_Y(glm::radians(180.0f))
+                    * Matrix_Rotate_X(glm::radians(270.0f))
+                    * Matrix_Rotate_Z(glm::radians(180.0f))
+                    * Matrix_Scale(1.0f, 1.0f, 1.0f);
             }
 
             // Envia as matrizes calculadas
@@ -1178,10 +1180,10 @@ int main()
             glUniform1i(render_as_black_uniform, false);
 
             // Desenha o objeto
-                        
-            if (g_VirtualScene.count("Cube002")) 
+
+            if (g_VirtualScene.count("Cube002"))
             {
-                SceneObject &obj = g_VirtualScene["Cube002"]; 
+                SceneObject& obj = g_VirtualScene["Cube002"];
                 glBindVertexArray(obj.vertex_array_object_id);
                 glDrawElements(
                     obj.rendering_mode,
@@ -1218,27 +1220,27 @@ int main()
             if (timeRemaining < 0) timeRemaining = 0;
             int minutes = (int)timeRemaining / 60;
             int seconds = (int)timeRemaining % 60;
-            
+
             char hud_text[100];
-            snprintf(hud_text, sizeof(hud_text), "Tempo: %d:%02d  |  Diamantes: %d/%d  |  Pontos: %d", 
-                     minutes, seconds, g_DiamondsCollected, DIAMONDS_TO_WIN, g_Score);
+            snprintf(hud_text, sizeof(hud_text), "Tempo: %d:%02d  |  Diamantes: %d/%d  |  Pontos: %d",
+                minutes, seconds, g_DiamondsCollected, DIAMONDS_TO_WIN, g_Score);
             TextRendering_PrintString(window, hud_text, -0.9f, 0.9f, 1.2f);
-            
+
             // Aviso de CHEATER na tela
             if (g_IsOutOfBounds) {
                 float timeOutOfBounds = currentFrameTime - g_OutOfBoundsStartTime;
                 float cheaterTimeRemaining = g_OutOfBoundsTimeLimit - timeOutOfBounds;
                 if (cheaterTimeRemaining < 0) cheaterTimeRemaining = 0;
-                
+
                 char cheater_text[100];
                 snprintf(cheater_text, sizeof(cheater_text), "VOCE ESTA FORA DO MAPA!");
                 TextRendering_PrintString(window, cheater_text, -0.45f, 0.3f, 2.0f);
-                
+
                 snprintf(cheater_text, sizeof(cheater_text), "Volte em %.0f segundos ou perdera!", cheaterTimeRemaining + 1);
                 TextRendering_PrintString(window, cheater_text, -0.5f, 0.15f, 1.5f);
             }
         }
-        
+
         // Mostramos mensagem de GAME OVER ou VITÓRIA na tela
         if (g_GameOver) {
             char score_text[99];
@@ -1316,7 +1318,8 @@ void LoadShader(const char* filename, GLuint shader_id)
     try {
         file.exceptions(std::ifstream::failbit);
         file.open(filename);
-    } catch ( std::exception& e ) {
+    }
+    catch (std::exception& e) {
         fprintf(stderr, "ERROR: Cannot open file \"%s\".\n", filename);
         std::exit(EXIT_FAILURE);
     }
@@ -1324,7 +1327,7 @@ void LoadShader(const char* filename, GLuint shader_id)
     shader << file.rdbuf();
     std::string str = shader.str();
     const GLchar* shader_string = str.c_str();
-    const GLint   shader_string_length = static_cast<GLint>( str.length() );
+    const GLint   shader_string_length = static_cast<GLint>(str.length());
 
     // Define o código do shader GLSL, contido na string "shader_string"
     glShaderSource(shader_id, 1, &shader_string, &shader_string_length);
@@ -1345,11 +1348,11 @@ void LoadShader(const char* filename, GLuint shader_id)
     glGetShaderInfoLog(shader_id, log_length, &log_length, log);
 
     // Imprime no terminal qualquer erro ou "warning" de compilação
-    if ( log_length != 0 )
+    if (log_length != 0)
     {
         std::string  output;
 
-        if ( !compiled_ok )
+        if (!compiled_ok)
         {
             output += "ERROR: OpenGL compilation of \"";
             output += filename;
@@ -1372,7 +1375,7 @@ void LoadShader(const char* filename, GLuint shader_id)
     }
 
     // A chamada "delete" em C++ é equivalente ao "free()" do C
-    delete [] log;
+    delete[] log;
 }
 
 // Função que carrega os shaders de vértices e de fragmentos que serão
@@ -1402,29 +1405,29 @@ void LoadShadersFromFiles()
     GLuint fragment_shader_id = LoadShader_Fragment("../../src/shader_fragment.glsl");
 
     // Deletamos o programa de GPU anterior, caso ele exista.
-    if ( g_GpuProgramID != 0 )
+    if (g_GpuProgramID != 0)
         glDeleteProgram(g_GpuProgramID);
 
     // Criamos um programa de GPU utilizando os shaders carregados acima.
     g_GpuProgramID = CreateGpuProgram(vertex_shader_id, fragment_shader_id);
 
     glUseProgram(g_GpuProgramID);
-    
+
     // Diz ao shader que "TextureImage0" deve ler da GL_TEXTURE0
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage0"), 0);
-    
+
     // Diz ao shader que "TextureImage1" deve ler da GL_TEXTURE1
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage1"), 1);
-    
+
     // Diz ao shader que "TextureImage2" deve ler da GL_TEXTURE2
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage2"), 2);
-    
+
     // Diz ao shader que "TextureImage3" deve ler da GL_TEXTURE3
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage3"), 3);
-    
+
     // Diz ao shader que "TextureImage4" deve ler da GL_TEXTURE4
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage4"), 4);
-    
+
     glUseProgram(0);
 
 }
@@ -1448,7 +1451,7 @@ GLuint CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id)
     glGetProgramiv(program_id, GL_LINK_STATUS, &linked_ok);
 
     // Imprime no terminal qualquer erro de linkagem
-    if ( linked_ok == GL_FALSE )
+    if (linked_ok == GL_FALSE)
     {
         GLint log_length = 0;
         glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &log_length);
@@ -1467,7 +1470,7 @@ GLuint CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id)
         output += "\n== End of link log\n";
 
         // A chamada "delete" em C++ é equivalente ao "free()" do C
-        delete [] log;
+        delete[] log;
 
         fprintf(stderr, "%s", output.c_str());
     }
@@ -1579,7 +1582,7 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
         dy *= sensitivity;
 
         // Atualizamos os ângulos de Yaw e Pitch
-        g_CameraYaw   += dx;
+        g_CameraYaw += dx;
         g_CameraPitch -= dy; // Invertido, pois coordenadas Y de tela crescem para baixo
 
         // Impomos limites ao Pitch para evitar que a câmera vire de cabeça para baixo
@@ -1600,9 +1603,9 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
     {
         // --- LÓGICA DA CÂMERA LOOK-AT (ORBITAL) ---
         // Aqui movemos Theta e Phi para orbitar
-        float sensitivity = 0.01f; 
+        float sensitivity = 0.01f;
         g_CameraTheta -= dx * sensitivity;
-        g_CameraPhi   += dy * sensitivity;
+        g_CameraPhi += dy * sensitivity;
 
         // Limites de Phi para não virar de ponta cabeça
         float phiMax = 3.141592f / 2.0f - 0.1f; // Quase 90 graus
@@ -1792,61 +1795,61 @@ void TextRendering_ShowModelViewProjection(
     glm::vec4 p_model
 )
 {
-    if ( !g_ShowInfoText )
+    if (!g_ShowInfoText)
         return;
 
-    glm::vec4 p_world = model*p_model;
-    glm::vec4 p_camera = view*p_world;
-    glm::vec4 p_clip = projection*p_camera;
+    glm::vec4 p_world = model * p_model;
+    glm::vec4 p_camera = view * p_world;
+    glm::vec4 p_clip = projection * p_camera;
     glm::vec4 p_ndc = p_clip / p_clip.w;
 
     float pad = TextRendering_LineHeight(window);
 
-    TextRendering_PrintString(window, " Model matrix             Model     In World Coords.", -1.0f, 1.0f-pad, 1.0f);
-    TextRendering_PrintMatrixVectorProduct(window, model, p_model, -1.0f, 1.0f-2*pad, 1.0f);
+    TextRendering_PrintString(window, " Model matrix             Model     In World Coords.", -1.0f, 1.0f - pad, 1.0f);
+    TextRendering_PrintMatrixVectorProduct(window, model, p_model, -1.0f, 1.0f - 2 * pad, 1.0f);
 
-    TextRendering_PrintString(window, "                                        |  ", -1.0f, 1.0f-6*pad, 1.0f);
-    TextRendering_PrintString(window, "                            .-----------'  ", -1.0f, 1.0f-7*pad, 1.0f);
-    TextRendering_PrintString(window, "                            V              ", -1.0f, 1.0f-8*pad, 1.0f);
+    TextRendering_PrintString(window, "                                        |  ", -1.0f, 1.0f - 6 * pad, 1.0f);
+    TextRendering_PrintString(window, "                            .-----------'  ", -1.0f, 1.0f - 7 * pad, 1.0f);
+    TextRendering_PrintString(window, "                            V              ", -1.0f, 1.0f - 8 * pad, 1.0f);
 
-    TextRendering_PrintString(window, " View matrix              World     In Camera Coords.", -1.0f, 1.0f-9*pad, 1.0f);
-    TextRendering_PrintMatrixVectorProduct(window, view, p_world, -1.0f, 1.0f-10*pad, 1.0f);
+    TextRendering_PrintString(window, " View matrix              World     In Camera Coords.", -1.0f, 1.0f - 9 * pad, 1.0f);
+    TextRendering_PrintMatrixVectorProduct(window, view, p_world, -1.0f, 1.0f - 10 * pad, 1.0f);
 
-    TextRendering_PrintString(window, "                                        |  ", -1.0f, 1.0f-14*pad, 1.0f);
-    TextRendering_PrintString(window, "                            .-----------'  ", -1.0f, 1.0f-15*pad, 1.0f);
-    TextRendering_PrintString(window, "                            V              ", -1.0f, 1.0f-16*pad, 1.0f);
+    TextRendering_PrintString(window, "                                        |  ", -1.0f, 1.0f - 14 * pad, 1.0f);
+    TextRendering_PrintString(window, "                            .-----------'  ", -1.0f, 1.0f - 15 * pad, 1.0f);
+    TextRendering_PrintString(window, "                            V              ", -1.0f, 1.0f - 16 * pad, 1.0f);
 
-    TextRendering_PrintString(window, " Projection matrix        Camera                    In NDC", -1.0f, 1.0f-17*pad, 1.0f);
-    TextRendering_PrintMatrixVectorProductDivW(window, projection, p_camera, -1.0f, 1.0f-18*pad, 1.0f);
+    TextRendering_PrintString(window, " Projection matrix        Camera                    In NDC", -1.0f, 1.0f - 17 * pad, 1.0f);
+    TextRendering_PrintMatrixVectorProductDivW(window, projection, p_camera, -1.0f, 1.0f - 18 * pad, 1.0f);
 
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
 
     glm::vec2 a = glm::vec2(-1, -1);
     glm::vec2 b = glm::vec2(+1, +1);
-    glm::vec2 p = glm::vec2( 0,  0);
+    glm::vec2 p = glm::vec2(0, 0);
     glm::vec2 q = glm::vec2(width, height);
 
     glm::mat4 viewport_mapping = Matrix(
-        (q.x - p.x)/(b.x-a.x), 0.0f, 0.0f, (b.x*p.x - a.x*q.x)/(b.x-a.x),
-        0.0f, (q.y - p.y)/(b.y-a.y), 0.0f, (b.y*p.y - a.y*q.y)/(b.y-a.y),
-        0.0f , 0.0f , 1.0f , 0.0f ,
-        0.0f , 0.0f , 0.0f , 1.0f
+        (q.x - p.x) / (b.x - a.x), 0.0f, 0.0f, (b.x * p.x - a.x * q.x) / (b.x - a.x),
+        0.0f, (q.y - p.y) / (b.y - a.y), 0.0f, (b.y * p.y - a.y * q.y) / (b.y - a.y),
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f
     );
 
-    TextRendering_PrintString(window, "                                                       |  ", -1.0f, 1.0f-22*pad, 1.0f);
-    TextRendering_PrintString(window, "                            .--------------------------'  ", -1.0f, 1.0f-23*pad, 1.0f);
-    TextRendering_PrintString(window, "                            V                           ", -1.0f, 1.0f-24*pad, 1.0f);
+    TextRendering_PrintString(window, "                                                       |  ", -1.0f, 1.0f - 22 * pad, 1.0f);
+    TextRendering_PrintString(window, "                            .--------------------------'  ", -1.0f, 1.0f - 23 * pad, 1.0f);
+    TextRendering_PrintString(window, "                            V                           ", -1.0f, 1.0f - 24 * pad, 1.0f);
 
-    TextRendering_PrintString(window, " Viewport matrix           NDC      In Pixel Coords.", -1.0f, 1.0f-25*pad, 1.0f);
-    TextRendering_PrintMatrixVectorProductMoreDigits(window, viewport_mapping, p_ndc, -1.0f, 1.0f-26*pad, 1.0f);
+    TextRendering_PrintString(window, " Viewport matrix           NDC      In Pixel Coords.", -1.0f, 1.0f - 25 * pad, 1.0f);
+    TextRendering_PrintMatrixVectorProductMoreDigits(window, viewport_mapping, p_ndc, -1.0f, 1.0f - 26 * pad, 1.0f);
 }
 
 // Escrevemos na tela os ângulos de Euler definidos nas variáveis globais
 // g_AngleX, g_AngleY, e g_AngleZ.
 void TextRendering_ShowEulerAngles(GLFWwindow* window)
 {
-    if ( !g_ShowInfoText )
+    if (!g_ShowInfoText)
         return;
 
     float pad = TextRendering_LineHeight(window);
@@ -1854,29 +1857,29 @@ void TextRendering_ShowEulerAngles(GLFWwindow* window)
     char buffer[80];
     snprintf(buffer, 80, "Euler Angles rotation matrix = Z(%.2f)*Y(%.2f)*X(%.2f)\n", g_AngleZ, g_AngleY, g_AngleX);
 
-    TextRendering_PrintString(window, buffer, -1.0f+pad/10, -1.0f+2*pad/10, 1.0f);
+    TextRendering_PrintString(window, buffer, -1.0f + pad / 10, -1.0f + 2 * pad / 10, 1.0f);
 }
 
 // Escrevemos na tela qual matriz de projeção está sendo utilizada.
 void TextRendering_ShowProjection(GLFWwindow* window)
 {
-    if ( !g_ShowInfoText )
+    if (!g_ShowInfoText)
         return;
 
     float lineheight = TextRendering_LineHeight(window);
     float charwidth = TextRendering_CharWidth(window);
 
-    if ( g_UsePerspectiveProjection )
-        TextRendering_PrintString(window, "Perspective", 1.0f-13*charwidth, -1.0f+2*lineheight/10, 1.0f);
+    if (g_UsePerspectiveProjection)
+        TextRendering_PrintString(window, "Perspective", 1.0f - 13 * charwidth, -1.0f + 2 * lineheight / 10, 1.0f);
     else
-        TextRendering_PrintString(window, "Orthographic", 1.0f-13*charwidth, -1.0f+2*lineheight/10, 1.0f);
+        TextRendering_PrintString(window, "Orthographic", 1.0f - 13 * charwidth, -1.0f + 2 * lineheight / 10, 1.0f);
 }
 
 // Escrevemos na tela o número de quadros renderizados por segundo (frames per
 // second).
 void TextRendering_ShowFramesPerSecond(GLFWwindow* window)
 {
-    if ( !g_ShowInfoText )
+    if (!g_ShowInfoText)
         return;
 
     // Variáveis estáticas (static) mantém seus valores entre chamadas
@@ -1894,7 +1897,7 @@ void TextRendering_ShowFramesPerSecond(GLFWwindow* window)
     // Número de segundos desde o último cálculo do fps
     float ellapsed_seconds = seconds - old_seconds;
 
-    if ( ellapsed_seconds > 1.0f )
+    if (ellapsed_seconds > 1.0f)
     {
         numchars = snprintf(buffer, 20, "%.2f fps", ellapsed_frames / ellapsed_seconds);
 
@@ -1905,7 +1908,7 @@ void TextRendering_ShowFramesPerSecond(GLFWwindow* window)
     float lineheight = TextRendering_LineHeight(window);
     float charwidth = TextRendering_CharWidth(window);
 
-    TextRendering_PrintString(window, buffer, 1.0f-(numchars + 1)*charwidth, 1.0f-lineheight, 1.0f);
+    TextRendering_PrintString(window, buffer, 1.0f - (numchars + 1) * charwidth, 1.0f - lineheight, 1.0f);
 }
 
 // set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null
