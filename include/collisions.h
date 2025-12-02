@@ -10,8 +10,9 @@
 // Tipos de células do mapa (Movido do main.cpp para cá para ser global)
 enum MapType { EMPTY = 0, WALL = 1, DAMAGED_WALL = 2, DIAMOND = 3 };
 
-// Declaração da matriz do mapa
-extern int maze_map[MAP_HEIGHT][MAP_WIDTH];
+// Declaração da matriz do mapa. É declarada aqui para ser acessível em outras partes do código.
+extern int maze_map[MAP_HEIGHT][MAP_WIDTH];  
+void ResetMap();
 
 // Funções
 bool CheckCollision(float x, float z); // Colisão física (andar)

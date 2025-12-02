@@ -12,9 +12,9 @@
 // 1 = WALL (parede intacta)
 // 2 = DAMAGED_WALL (parede danificada - aparece vermelha)
 // 3 = DIAMOND (diamante coletável)
-int maze_map[MAP_HEIGHT][MAP_WIDTH] = {
+const int original_maze_map[MAP_HEIGHT][MAP_WIDTH] = {
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-    {1,0,0,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,3,3,3,3,3,3,1,0,0,0,0,0,0,0,0,0,0,0,1},
     {1,0,1,1,1,0,1,0,1,1,1,1,1,1,1,0,1,1,0,1},
     {1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,0,1},
     {1,0,1,0,1,1,1,1,1,0,1,1,1,0,1,0,1,0,1,1},
@@ -34,6 +34,18 @@ int maze_map[MAP_HEIGHT][MAP_WIDTH] = {
     {1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1},
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
+
+// Definição da matriz do mapa que será uma copia da original e poderá ser modificada
+int maze_map[MAP_HEIGHT][MAP_WIDTH];
+
+// Reinicia o mapa para o original
+void ResetMap() {
+    for (int z = 0; z < MAP_HEIGHT; z++) {
+        for (int x = 0; x < MAP_WIDTH; x++) {
+            maze_map[z][x] = original_maze_map[z][x];
+        }
+    }
+}
 
 // Implementação da função de colisão
 // Retorna true se houver colisão com WALL (1) ou DAMAGED_WALL (2)

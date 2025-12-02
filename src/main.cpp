@@ -40,7 +40,8 @@
 #include "utils.h"
 #include "matrices.h"
 #include "collisions.h"
-#include "scene_builder.h" // Contém BuildTriangles(), SceneObject e g_VirtualScene
+// Contém BuildTriangles(), SceneObject e g_VirtualScene
+#include "scene_builder.h"
 
 // Headers da biblioteca para carregar modelos obj
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -370,23 +371,23 @@ bool g_ShowCeiling = true; // Controla visibilidade do teto
 // usuário através do mouse (veja função CursorPosCallback()). A posição
 // efetiva da câmera é calculada dentro da função main(), dentro do loop de
 // renderização.
-float g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
-float g_CameraPhi = 0.0f;   // Ângulo em relação ao eixo Y
-float g_CameraDistance = 2.5f; // Distância da câmera para a origem
+float g_CameraTheta;    // Ângulo no plano ZX em relação ao eixo Z
+float g_CameraPhi;      // Ângulo em relação ao eixo Y
+float g_CameraDistance; // Distância da câmera para a origem
 
-glm::vec4 g_CameraPosition     = glm::vec4(-5.0f, 0.0f, -5.0f, 1.0f); // Posição inicial da câmera
-glm::vec4 g_CameraViewVector   = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f); // Vetor "view", para onde a câmera está virada
-glm::vec4 g_CameraUpVector     = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f); // Vetor "up"
+glm::vec4 g_CameraPosition = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);   // Posição da câmera
+glm::vec4 g_CameraViewVector = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f); // Vetor "view", para onde a câmera está virada
+glm::vec4 g_CameraUpVector = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);   // Vetor "up"
 
 // Ângulos para controle do mouse
-float g_CameraYaw   = -90.0f; // Yaw é rotação em torno do eixo Y. -90 graus para apontar para -Z.
-float g_CameraPitch = 0.0f;   // Pitch é rotação em torno do eixo X.
+float g_CameraYaw;   // Yaw é rotação em torno do eixo Y
+float g_CameraPitch; // Pitch é rotação em torno do eixo X
 
 // Variáveis para controle de movimento
-bool g_W_pressed = false;
-bool g_S_pressed = false;
-bool g_A_pressed = false;
-bool g_D_pressed = false;
+bool g_W_pressed;
+bool g_S_pressed;
+bool g_A_pressed;
+bool g_D_pressed;
 
 // Variável que controla o tipo de projeção utilizada: perspectiva ou ortográfica.
 bool g_UsePerspectiveProjection = true;
@@ -398,8 +399,8 @@ bool g_ShowInfoText = true;
 GLuint g_GpuProgramID = 0;
 
 // Variáveis para animação da picareta
-bool g_IsSwinging = false;         // Controla se a animação está ativa
-float g_SwingAnimationTime = 0.0f; // Controla o progresso da animação (t de 0 a 1)
+bool g_IsSwinging;         // Controla se a animação está ativa
+float g_SwingAnimationTime; // Controla o progresso da animação (t de 0 a 1)
 
 // Função para calcular ponto em curva de Bézier Cúbica
 // c(t) = (1-t)^3 * P0 + 3t(1-t)^2 * P1 + 3t^2(1-t) * P2 + t^3 * P3
@@ -432,6 +433,79 @@ GLuint g_TextureIdGravelstones = 0;
 GLuint g_textureIdGraystonse = 0;
 GLuint g_TextureIdDiamond = 0; // Textura do diamante
 
+// ****************** Controle dos tempos ******************
+// Variáveis para controle do jogo
+bool g_GameOver;
+bool g_Victory;
+// Tempo em que o jogo começou
+float g_GameStartTime;
+// Tempo limite 2 minutos
+const float g_GameTimeLimit = 120.0f;
+//***********************************************************
+
+// ****************** Sistema Anti-Cheater ******************
+// Jogador está fora dos limites do mapa?
+bool g_IsOutOfBounds;
+// Tempo em que começou a estar fora do mapa
+float g_OutOfBoundsStartTime;
+// Tempo limite fora do mapa antes de Game Over (10 segundos)
+const float g_OutOfBoundsTimeLimit = 10.0f;
+//***********************************************************
+
+// ****************** Sistema de pontuação ******************
+// Número de diamantes coletados
+int g_DiamondsCollected;
+// Pontuação atual
+int g_Score;
+// Pontos por diamante
+const int DIAMOND_POINTS = 50;
+// Diamantes necessários para vencer
+const int DIAMONDS_TO_WIN = 2;
+//***********************************************************
+
+// ****************** Função para resetar/inicializar o estado do jogo ******************
+void ResetGame()
+{
+    // Reseta o mapa
+    ResetMap();
+
+    // Reseta estado do jogo
+    g_GameOver = false;
+    g_Victory = false;
+    g_GameStartTime = (float)glfwGetTime();
+    
+    // Reseta pontuação
+    g_DiamondsCollected = 0;
+    g_Score = 0;
+    
+    // Reseta anti-cheater
+    g_IsOutOfBounds = false;
+    g_OutOfBoundsStartTime = 0.0f;
+    
+    // Reseta posição e orientação da câmera
+    g_CameraTheta = 0.0f;
+    g_CameraPhi = 0.0f;
+    g_CameraDistance = 2.5f;
+    g_CameraPosition     = glm::vec4(-5.0f, 0.0f, -5.0f, 1.0f); // Posição inicial da câmera
+    g_CameraViewVector   = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f); // Vetor "view", para onde a câmera está virada
+    g_CameraUpVector     = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f); // Vetor "up"
+    g_CameraYaw = -90.0f;
+    g_CameraPitch = 0.0f;
+    
+    // Reseta animação da picareta
+    g_IsSwinging = false;
+    g_SwingAnimationTime = 0.0f;
+    
+    // Variável que controla o tipo de projeção utilizada: perspectiva ou ortográfica.
+    bool g_UsePerspectiveProjection = true;
+
+    // Reseta teclas pressionadas
+    g_W_pressed = false;
+    g_S_pressed = false;
+    g_A_pressed = false;
+    g_D_pressed = false;
+}
+//***********************************************************
 
 int main()
 {
@@ -443,6 +517,9 @@ int main()
         fprintf(stderr, "ERROR: glfwInit() failed.\n");
         std::exit(EXIT_FAILURE);
     }
+
+    // Inicializa o estado do jogo logo após GLFW (para evitar variáveis não inicializadas)
+    ResetGame();
 
     // Definimos o callback para impressão de erros da GLFW no terminal
     glfwSetErrorCallback(ErrorCallback);
@@ -515,12 +592,12 @@ int main()
     TextRendering_Init();
 
     // CARREGAMENTO DO OBJ (Picareta) USANDO CLASSE DO LAB 5
-    ObjModel pickaxeModel("../../src/pickaxe.obj"); 
+    ObjModel pickaxeModel("../../data/obj/pickaxe.obj"); 
     ComputeNormals(&pickaxeModel);
     BuildTrianglesAndAddToVirtualScene(&pickaxeModel);
 
     // CARREGAMENTO DO OBJ (Diamante)
-    ObjModel diamondModel("../../data/obj/diamond_obj.obj"); 
+    ObjModel diamondModel("../../data/obj/diamond.obj"); 
     ComputeNormals(&diamondModel);
     BuildTrianglesAndAddToVirtualScene(&diamondModel);
     
@@ -562,11 +639,40 @@ int main()
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
+        // ******************* Possível Final de jogo ******************
+        // Verifica se o jogo acabou
+        if (g_GameOver || g_Victory)
+        {
+            // Se tiver acabado desativamos o movimento
+            g_W_pressed = false;
+            g_S_pressed = false;
+            g_A_pressed = false;
+            g_D_pressed = false;
+
+            // Preara a string dependendo do resultado do jogo
+            std::string endMessage = g_GameOver ? "GAME OVER!" : "PARABENS! VOCE VENCEU!";
+            
+            // Printa as mensagens de fim de jogo
+            TextRendering_PrintString(window, endMessage, -0.5f, 0.8f, 2.5f);
+            TextRendering_PrintString(window, "Pressione R para jogar novamente", -0.5f, 0.2f, 1.5f);
+        }
+        // ***************************************************************
 
         // Cálculo do Delta Time
         float currentFrameTime = (float)glfwGetTime();
         g_DeltaTime = currentFrameTime - g_LastFrameTime;
         g_LastFrameTime = currentFrameTime;
+
+        // Verifica se o tempo limite foi atingido (10 segundos)
+        if (!g_GameOver && !g_Victory)
+        {
+            float elapsedTime = currentFrameTime - g_GameStartTime;
+            if (elapsedTime >= g_GameTimeLimit)
+            {
+                g_GameOver = true;
+                printf("GAME OVER! Tempo esgotado!\n");
+            }
+        }
 
         // Atualização da Animação
         if (g_IsSwinging)
@@ -909,10 +1015,65 @@ int main()
         int player_grid_x = (int)(g_CameraPosition.x + (float)MAP_WIDTH / 2.0f + 0.5f);
         int player_grid_z = (int)(g_CameraPosition.z + (float)MAP_HEIGHT / 2.0f + 0.5f);
 
-        if (maze_map[player_grid_z][player_grid_x] == DIAMOND)
+        // Correção do primeiro bug de pontuação: Verifica se o jogador está dentro dos limites do mapa
+        // Verifica se está dentro dos limites do mapa antes de checar diamante
+        bool isInsideMap = (player_grid_x >= 0 && player_grid_x < MAP_WIDTH && 
+                           player_grid_z >= 0 && player_grid_z < MAP_HEIGHT);
+        
+        if (isInsideMap)
         {
-            maze_map[player_grid_z][player_grid_x] = EMPTY;
-            printf("Diamante coletado!\n");            
+            // Jogador voltou para dentro do mapa
+            if (g_IsOutOfBounds) {
+                g_IsOutOfBounds = false;
+                printf("Jogador voltou para dentro do mapa!\n");
+            }
+            
+            if (maze_map[player_grid_z][player_grid_x] == DIAMOND && !g_GameOver && !g_Victory)
+            {
+                maze_map[player_grid_z][player_grid_x] = EMPTY;
+                g_DiamondsCollected++;
+                g_Score += DIAMOND_POINTS;
+                printf("Diamante coletado em (%d, %d)! Total: %d | Pontos: %d\n", 
+                       player_grid_x, player_grid_z, g_DiamondsCollected, g_Score);
+                
+                // Verifica condição de vitória
+                if (g_DiamondsCollected >= DIAMONDS_TO_WIN)
+                {
+                    g_Victory = true;
+                    // Adiciona o tempo restante à pontuação
+                    float timeRemaining = g_GameTimeLimit - (currentFrameTime - g_GameStartTime);
+                    g_Score += (int)timeRemaining;
+                    printf("VITORIA! Pontuacao final: %d (bonus de tempo: %d)\n", g_Score, (int)timeRemaining);
+                }
+            }
+        } 
+        else if (!g_GameOver && !g_Victory)
+        {
+            // Jogador está fora dos limites do mapa (CHEATER!)
+            if (!g_IsOutOfBounds) {
+                // Começou a estar fora do mapa agora
+                g_IsOutOfBounds = true;
+                g_OutOfBoundsStartTime = currentFrameTime;
+                printf("AVISO: Jogador saiu dos limites do mapa! Posicao: (%d, %d)\n", player_grid_x, player_grid_z);
+            }
+            
+            // Calcula tempo restante antes do Game Over
+            float timeOutOfBounds = currentFrameTime - g_OutOfBoundsStartTime;
+            float cheaterTimeRemaining = g_OutOfBoundsTimeLimit - timeOutOfBounds;
+            
+            if (cheaterTimeRemaining <= 0) {
+                // Tempo esgotado - GAME OVER por cheating
+                g_GameOver = true;
+                printf("GAME OVER! Voce ficou muito tempo fora do mapa (CHEATER!)\n");
+            } else {
+                // Aviso no terminal a cada segundo
+                static int lastSecond = -1;
+                int currentSecond = (int)cheaterTimeRemaining;
+                if (currentSecond != lastSecond) {
+                    printf("CHEATER! Volte ao mapa em %d segundos ou perdera!\n", currentSecond + 1);
+                    lastSecond = currentSecond;
+                }
+            }
         }
 
         // Agora queremos desenhar os eixos XYZ de coordenadas GLOBAIS.
@@ -1051,6 +1212,49 @@ int main()
         // Imprimimos na tela informação sobre o número de quadros renderizados
         // por segundo (frames per second).
         TextRendering_ShowFramesPerSecond(window);
+
+        // Mostra HUD com tempo e pontuação
+        if (!g_GameOver && !g_Victory) {
+            float timeRemaining = g_GameTimeLimit - (currentFrameTime - g_GameStartTime);
+            if (timeRemaining < 0) timeRemaining = 0;
+            int minutes = (int)timeRemaining / 60;
+            int seconds = (int)timeRemaining % 60;
+            
+            char hud_text[100];
+            snprintf(hud_text, sizeof(hud_text), "Tempo: %d:%02d  |  Diamantes: %d/%d  |  Pontos: %d", 
+                     minutes, seconds, g_DiamondsCollected, DIAMONDS_TO_WIN, g_Score);
+            TextRendering_PrintString(window, hud_text, -0.9f, 0.9f, 1.2f);
+            
+            // Aviso de CHEATER na tela
+            if (g_IsOutOfBounds) {
+                float timeOutOfBounds = currentFrameTime - g_OutOfBoundsStartTime;
+                float cheaterTimeRemaining = g_OutOfBoundsTimeLimit - timeOutOfBounds;
+                if (cheaterTimeRemaining < 0) cheaterTimeRemaining = 0;
+                
+                char cheater_text[100];
+                snprintf(cheater_text, sizeof(cheater_text), "VOCE ESTA FORA DO MAPA!");
+                TextRendering_PrintString(window, cheater_text, -0.45f, 0.3f, 2.0f);
+                
+                snprintf(cheater_text, sizeof(cheater_text), "Volte em %.0f segundos ou perdera!", cheaterTimeRemaining + 1);
+                TextRendering_PrintString(window, cheater_text, -0.5f, 0.15f, 1.5f);
+            }
+        }
+        
+        // Mostramos mensagem de GAME OVER ou VITÓRIA na tela
+        if (g_GameOver) {
+            char score_text[99];
+            snprintf(score_text, sizeof(score_text), "Pontuacao: %d", g_Score);
+            TextRendering_PrintString(window, "GAME OVER", -0.3f, 0.1f, 3.0f);
+            TextRendering_PrintString(window, score_text, -0.25f, -0.05f, 1.5f);
+            TextRendering_PrintString(window, "Pressione R para reiniciar", -0.5f, -0.2f, 1.5f);
+        }
+        else if (g_Victory) {
+            char score_text[99];
+            snprintf(score_text, sizeof(score_text), "Pontuacao Final: %d", g_Score);
+            TextRendering_PrintString(window, "PARABENS! VOCE VENCEU!", -0.5f, 0.1f, 2.5f);
+            TextRendering_PrintString(window, score_text, -0.35f, -0.05f, 1.5f);
+            TextRendering_PrintString(window, "Pressione R para jogar novamente", -0.55f, -0.2f, 1.5f);
+        }
 
         // O framebuffer onde OpenGL executa as operações de renderização não
         // é o mesmo que está sendo mostrado para o usuário, caso contrário
@@ -1302,6 +1506,10 @@ double g_LastCursorPosX, g_LastCursorPosY;
 // Função callback chamada sempre que o usuário aperta algum dos botões do mouse
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
+    // Se o jogo acabou, bloqueia ações do mouse - FINAL DE JOGO
+    if (g_GameOver || g_Victory)
+        return;
+
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
         // Se o usuário pressionou o botão esquerdo do mouse, guardamos a
@@ -1446,6 +1654,19 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     // Se o usuário pressionar a tecla ESC, fechamos a janela.
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
+
+    // Se o usuário pressionar R, reinicia o jogo
+    if (key == GLFW_KEY_R && action == GLFW_PRESS)
+    {
+        if (g_GameOver || g_Victory)
+        {
+            ResetGame();
+        }
+    }
+
+    // Se o jogo acabou, bloqueia todas as outras ações - FINAL DE JOGO
+    if (g_GameOver || g_Victory)
+        return;
 
     // O código abaixo implementa a seguinte lógica:
     //   Se apertar tecla X       então g_AngleX += delta;
