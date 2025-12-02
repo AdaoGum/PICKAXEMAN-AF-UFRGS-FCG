@@ -1028,13 +1028,12 @@ int main()
                 printf("Jogador voltou para dentro do mapa!\n");
             }
             
-            if (maze_map[player_grid_z][player_grid_x] == DIAMOND && !g_GameOver && !g_Victory)
+            // Verifica coleta de diamante usando a função de colisão
+            if (!g_GameOver && !g_Victory && CheckDiamondCollision(g_CameraPosition))
             {
-                maze_map[player_grid_z][player_grid_x] = EMPTY;
                 g_DiamondsCollected++;
                 g_Score += DIAMOND_POINTS;
-                printf("Diamante coletado em (%d, %d)! Total: %d | Pontos: %d\n", 
-                       player_grid_x, player_grid_z, g_DiamondsCollected, g_Score);
+                printf("Total: %d | Pontos: %d\n", g_DiamondsCollected, g_Score);
                 
                 // Verifica condição de vitória
                 if (g_DiamondsCollected >= DIAMONDS_TO_WIN)

@@ -120,7 +120,8 @@ void CheckMapCollisionAndBreak(glm::vec4 camera_position, glm::vec4 view_vector)
     }
 }
 
-void CheckDiamondCollision(glm::vec4 camera_position)
+// Verifica colisão com diamante e retorna true se coletou
+bool CheckDiamondCollision(glm::vec4 camera_position)
 {
     // Convertendo posição do mundo (float) para índice da matriz (int).
     // O +0.5f é para garantir o arredondamento correto para o centro do tile
@@ -137,10 +138,10 @@ void CheckDiamondCollision(glm::vec4 camera_position)
             // Remove o diamante do mapa
             maze_map[player_grid_z][player_grid_x] = EMPTY;
             
-            // Feedback para o jogador
-            printf("Diamante coletado! (+100 pontos)\n");
-            
-            // Aqui você poderia tocar um som ou incrementar uma variável de score global
+            // Diamante coletado!
+            printf("Diamante coletado em (%d, %d)!\n", player_grid_x, player_grid_z);
+            return true; 
         }
     }
+    return false;
 }
