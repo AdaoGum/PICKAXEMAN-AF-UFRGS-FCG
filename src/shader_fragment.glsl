@@ -5,6 +5,11 @@ in vec4 normal;
 in vec4 position_model;
 in vec2 texcoords;
 
+// Fatores de iluminação interpolados (calculados por vértice no vertex shader)
+in float gouraud_diffuse;
+in float gouraud_specular;
+in float gouraud_ambient;
+
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
@@ -69,33 +74,33 @@ void main()
     // --- 2. Mapeamento de Textura (U, V) ---
     float U = 0.0;
     float V = 0.0;
-    
+
     // Fator de repetição (aumente se quiser ladrilhos menores)
-    float tiling = 1.0; 
+    float tiling = 1.0;
 
     if (object_id == OBJ_CUBE_WALL)
     {
         // Mapeamento Planar Automático (Triplanar)
         // Decide qual eixo usar baseado na Normal calculada acima
         vec3 absN = abs(n.xyz);
-        
-        if (absN.x > absN.y && absN.x > absN.z) 
-        { 
+
+        if (absN.x > absN.y && absN.x > absN.z)
+        {
             // Paredes laterais (X)
-            U = position_world.z; 
-            V = position_world.y; 
+            U = position_world.z;
+            V = position_world.y;
         }
-        else if (absN.y > absN.x && absN.y > absN.z) 
-        { 
+        else if (absN.y > absN.x && absN.y > absN.z)
+        {
             // Topo/Baixo (Y)
-            U = position_world.x; 
-            V = position_world.z; 
+            U = position_world.x;
+            V = position_world.z;
         }
-        else 
-        { 
+        else
+        {
             // Paredes frente/trás (Z)
-            U = position_world.x; 
-            V = position_world.y; 
+            U = position_world.x;
+            V = position_world.y;
         }
     }
     else if (object_id == OBJ_CUBE_FLOOR)
@@ -108,7 +113,7 @@ void main()
     else if (object_id == OBJ_CEILING)
     {
         // Teto - usa coordenadas X/Z como o chão
-        U = position_world.x;
+         U = position_world.x;
         V = position_world.z;
         tiling = 4.0;
     }
@@ -119,7 +124,7 @@ void main()
         V = 0.0;
         tiling = 0.05; // Escala para o tamanho do diamante
     }
-    else 
+    else
     {
         // Picareta
         U = texcoords.x;
@@ -141,12 +146,12 @@ void main()
         blending = normalize(max(blending, 0.00001));
         float b = (blending.x + blending.y + blending.z);
         blending /= b;
-        
+
         // Amostra a textura de 3 direções
         vec3 xaxis = texture(TextureImage4, position_model.yz * tiling).rgb;
         vec3 yaxis = texture(TextureImage4, position_model.xz * tiling).rgb;
         vec3 zaxis = texture(TextureImage4, position_model.xy * tiling).rgb;
-        
+
         // Mistura baseado na normal
         Kd = xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
     }
@@ -160,7 +165,7 @@ void main()
         Ks = vec3(0.5, 0.5, 0.5);
     float q = 10.0;
     vec3 Ka = Kd * 0.5; // Ambiente
-    vec3 I = vec3(1.0, 1.0, 1.0); 
+    vec3 I = vec3(1.0, 1.0, 1.0);
 
     float lambert = max(0, dot(n, l));
     vec4 h = normalize(l + v);
@@ -168,13 +173,29 @@ void main()
 
     if (lambert <= 0.0) specular_term = 0.0;
 
-    color.rgb = Ka + (Kd * lambert * I) + (Ks * specular_term * I);
+    // Se for picareta, usa modelo de Gouraud, senão Phong
+    if (object_id == OBJ_PICKAXE)
+    {
+        // ========== MODELO DE GOURAUD ==========
+        // Iluminação foram calculados por vertice no vertex shader e INTERPOLADOS para cada pixel. Aqui aplicamos esses fatores à TEXTURA.
+        vec3 Ks_pickaxe = vec3(0.3, 0.3, 0.3);
+        color.rgb = (Kd * gouraud_ambient) + (Kd * gouraud_diffuse * I) + (Ks_pickaxe * gouraud_specular * I);
+    }
+    else
+    {
+        // ========== MODELO DE PHONG ==========
+        // Iluminação calculada por pixel
+        color.rgb = Ka + (Kd * lambert * I) + (Ks * specular_term * I);
+    }
 
     // Se a parede está danificada, mistura com cor vermelha
     if (is_damaged == 1 && object_id == OBJ_CUBE_WALL)
     {
-        vec3 damaged_color = vec3(0.8, 0.2, 0.2); // Vermelho
-        color.rgb = mix(color.rgb, damaged_color, 0.5); // 50% de mistura com vermelho
+        // Vermelho
+        vec3 damaged_color = vec3(0.8, 0.2, 0.2);
+
+        // 50% de mistura com vermelho
+        color.rgb = mix(color.rgb, damaged_color, 0.5);
     }
 
     color.a = 1.0;

@@ -393,7 +393,7 @@ bool g_D_pressed;
 bool g_UsePerspectiveProjection = true;
 
 // Variável que controla se o texto informativo será mostrado na tela.
-bool g_ShowInfoText = true;
+bool g_ShowInfoText = false;
 
 // Variáveis que definem um programa de GPU (shaders). Veja função LoadShadersFromFiles().
 GLuint g_GpuProgramID = 0;
@@ -630,12 +630,12 @@ int main()
     // Inicializa o g_LastFrameTime antes do loop
     g_LastFrameTime = (float)glfwGetTime();
 
-    g_TextureIdStone = LoadTextureImage("../../data/425.jpg"); // Textura 0 (Paredes)
-    g_TextureIdGrass = LoadTextureImage("../../data/grass.jpg"); // Textura 1 (Chão)
-    g_TextureIdWood = LoadTextureImage("../../data/wood.jpg"); // Textura 2 (Picareta)
-    g_TextureIdGravelstones = LoadTextureImage("../../data/gravelstones.jpg"); // Textura 3 (Chão de Pedra)
-    g_textureIdGraystonse = LoadTextureImage("../../data/grayrocks.jpg"); // Textura 4 (Teto)
-    g_TextureIdDiamond = LoadTextureImage("../../data/obj/diamond_obj.png"); // Textura 5 (Diamante)
+    g_TextureIdStone = LoadTextureImage("../../data/textures/425.jpg"); // Textura 0 (Paredes)
+    g_TextureIdGrass = LoadTextureImage("../../data/textures/grass.jpg"); // Textura 1 (Chão)
+    g_TextureIdWood = LoadTextureImage("../../data/textures/wood.jpg"); // Textura 2 (Picareta)
+    g_TextureIdGravelstones = LoadTextureImage("../../data/textures/gravelstones.jpg"); // Textura 3 (Chão de Pedra)
+    g_textureIdGraystonse = LoadTextureImage("../../data/textures/grayrocks.jpg"); // Textura 4 (Teto)
+    g_TextureIdDiamond = LoadTextureImage("../../data/textures/diamond_obj.png"); // Textura 5 (Diamante)
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
