@@ -15,11 +15,12 @@ uniform mat4 view;
 uniform mat4 projection;
 
 // Identificadores
-#define OBJ_CUBE_WALL  0
-#define OBJ_CUBE_FLOOR 1
-#define OBJ_PICKAXE    2
-#define OBJ_CEILING    3
-#define OBJ_DIAMOND    4
+#define OBJ_CUBE_WALL    0
+#define OBJ_CUBE_FLOOR   1
+#define OBJ_PICKAXE      2
+#define OBJ_CEILING      3
+#define OBJ_DIAMOND      4
+#define OBJ_TITLE_SCREEN 5
 
 uniform int object_id;
 uniform bool render_as_black;
@@ -32,6 +33,7 @@ uniform sampler2D TextureImage1; // Grama
 uniform sampler2D TextureImage2; // Madeira
 uniform sampler2D TextureImage3; // Teto (graystones)
 uniform sampler2D TextureImage4; // Diamante
+uniform sampler2D TextureImage5; // Tela de Titulo
 
 // Iluminação
 uniform vec4 bbox_min;
@@ -44,6 +46,13 @@ void main()
     if (render_as_black)
     {
         color = vec4(0.0, 0.0, 0.0, 1.0);
+        return;
+    }
+
+    // Tela de título: renderiza textura diretamente sem iluminação
+    if (object_id == OBJ_TITLE_SCREEN)
+    {
+        color = texture(TextureImage5, texcoords);
         return;
     }
 

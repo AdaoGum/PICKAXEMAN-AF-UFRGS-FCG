@@ -432,6 +432,11 @@ GLuint g_TextureIdCobblestone = 0;
 GLuint g_TextureIdGravelstones = 0;
 GLuint g_textureIdGraystonse = 0;
 GLuint g_TextureIdDiamond = 0; // Textura do diamante
+GLuint g_TextureIdTitleScreen = 0; // Textura da tela de título
+
+// ****************** Tela Inicial ******************
+bool g_ShowTitleScreen = true; // Mostra a tela de título no início
+//***********************************************************
 
 // ****************** Controle dos tempos ******************
 // Variáveis para controle do jogo
@@ -486,7 +491,7 @@ void ResetGame()
     g_CameraTheta = 0.0f;
     g_CameraPhi = 0.0f;
     g_CameraDistance = 2.5f;
-    g_CameraPosition = glm::vec4(-5.0f, 0.0f, -5.0f, 1.0f); // Posição inicial da câmera
+    g_CameraPosition = glm::vec4(-1.0f, 0.0f, 9.0f, 1.0f); // Posição inicial da câmera (grid 9,19 - primeiro 0 da última linha)
     g_CameraViewVector = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f); // Vetor "view", para onde a câmera está virada
     g_CameraUpVector = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f); // Vetor "up"
     g_CameraYaw = -90.0f;
@@ -636,10 +641,92 @@ int main()
     g_TextureIdGravelstones = LoadTextureImage("../../data/textures/gravelstones.jpg"); // Textura 3 (Chão de Pedra)
     g_textureIdGraystonse = LoadTextureImage("../../data/textures/grayrocks.jpg"); // Textura 4 (Teto)
     g_TextureIdDiamond = LoadTextureImage("../../data/textures/diamond_obj.png"); // Textura 5 (Diamante)
+    g_TextureIdTitleScreen = LoadTextureImage("../../data/textures/title_screen.png"); // Textura 6 (Tela de Título)
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
+        // ******************* Tela de Título ******************
+        if (g_ShowTitleScreen)
+        {
+            // Limpa a tela
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            
+            // Desabilita depth test para desenhar em 2D
+            glDisable(GL_DEPTH_TEST);
+            
+            // Usa o programa de shaders
+            glUseProgram(g_GpuProgramID);
+            
+            // Bind da textura da tela de título na unidade 5 (TextureImage5)
+            glActiveTexture(GL_TEXTURE5);
+            glBindTexture(GL_TEXTURE_2D, g_TextureIdTitleScreen);
+            glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage5"), 5);
+            
+            // Configura matrizes identidade para projeção ortográfica 2D
+            glm::mat4 identity = glm::mat4(1.0f);
+            
+            glUniformMatrix4fv(glGetUniformLocation(g_GpuProgramID, "model"), 1, GL_FALSE, glm::value_ptr(identity));
+            glUniformMatrix4fv(glGetUniformLocation(g_GpuProgramID, "view"), 1, GL_FALSE, glm::value_ptr(identity));
+            glUniformMatrix4fv(glGetUniformLocation(g_GpuProgramID, "projection"), 1, GL_FALSE, glm::value_ptr(identity));
+            glUniform1i(glGetUniformLocation(g_GpuProgramID, "object_id"), 5); // OBJ_TITLE_SCREEN = 5
+            glUniform1i(glGetUniformLocation(g_GpuProgramID, "render_as_black"), false);
+            
+            // Cria VAO temporário para o quad da tela de título
+            static GLuint title_vao = 0;
+            static GLuint title_vbo = 0;
+            if (title_vao == 0)
+            {
+                // Quad que cobre toda a tela com coordenadas UV
+                // Formato: x, y, z, u, v
+                float quadVertices[] = {
+                    // Posição          // UV
+                    -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,  // Top-left
+                    -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,  // Bottom-left
+                     1.0f, -1.0f, 0.0f,  1.0f, 0.0f,  // Bottom-right
+                    
+                    -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,  // Top-left
+                     1.0f, -1.0f, 0.0f,  1.0f, 0.0f,  // Bottom-right
+                     1.0f,  1.0f, 0.0f,  1.0f, 1.0f   // Top-right
+                };
+                
+                glGenVertexArrays(1, &title_vao);
+                glGenBuffers(1, &title_vbo);
+                glBindVertexArray(title_vao);
+                glBindBuffer(GL_ARRAY_BUFFER, title_vbo);
+                glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+                
+                // Posição (location = 0)
+                glEnableVertexAttribArray(0);
+                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+                
+                // Coordenadas UV (location = 2 para texture_coefficients)
+                glEnableVertexAttribArray(2);
+                glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+            }
+            
+            // Desenha o quad
+            glBindVertexArray(title_vao);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            
+            // Reabilita depth test
+            glEnable(GL_DEPTH_TEST);
+            
+            // Mostra texto "Pressione ENTER para começar" piscando
+            float time = (float)glfwGetTime();
+            if (fmod(time, 1.0f) < 0.7f) // Pisca
+            {
+                TextRendering_PrintString(window, "Pressione ENTER para comecar", -0.45f, -0.7f, 1.5f);
+            }
+            
+            // Troca os buffers e processa eventos
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+            continue; // Pula o resto do loop
+        }
+        // ***************************************************************
+
         // ******************* Possível Final de jogo ******************
         // Verifica se o jogo acabou
         if (g_GameOver || g_Victory)
@@ -1656,6 +1743,18 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     // Se o usuário pressionar a tecla ESC, fechamos a janela.
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
+
+    // Se o usuário pressionar ENTER na tela de título, inicia o jogo
+    if (key == GLFW_KEY_ENTER && action == GLFW_PRESS && g_ShowTitleScreen)
+    {
+        g_ShowTitleScreen = false;
+        ResetGame(); // Inicia o jogo
+        return;
+    }
+
+    // Se estiver na tela de título, bloqueia outras ações
+    if (g_ShowTitleScreen)
+        return;
 
     // Se o usuário pressionar R, reinicia o jogo
     if (key == GLFW_KEY_R && action == GLFW_PRESS)
