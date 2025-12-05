@@ -43,4 +43,5 @@ desktop.ini
 *.log
 
 # Histórico local
-.history
+.historybuild/
+.history/
