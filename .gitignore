@@ -1,46 +1,46 @@
-# Arquivos e diretórios de compilação do CMake
-/build/
-/bin/
-/obj/
+# # Arquivos e diretórios de compilação do CMake
+# /build/
+# /bin/
+# /obj/
 
-# Arquivos gerados pelo CMake que podem aparecer no diretório raiz
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
-compile_commands.json
-Makefile
+# # Arquivos gerados pelo CMake que podem aparecer no diretório raiz
+# CMakeCache.txt
+# CMakeFiles/
+# cmake_install.cmake
+# compile_commands.json
+# Makefile
 
-# Arquivos de projeto do Code::Blocks
-*.cbp
-*.depend
-*.layout
+# # Arquivos de projeto do Code::Blocks
+# *.cbp
+# *.depend
+# *.layout
 
-# Arquivos de projeto e configurações do Visual Studio / VS Code
-.vs/
-.vscode/
-*.sln
-*.suo
-*.user
-*.vcxproj
-*.vcxproj.filters
-*.vcxproj.user
+# # Arquivos de projeto e configurações do Visual Studio / VS Code
+# .vs/
+# .vscode/
+# *.sln
+# *.suo
+# *.user
+# *.vcxproj
+# *.vcxproj.filters
+# *.vcxproj.user
 
-# Executáveis e bibliotecas
-*.exe
-*.dll
-*.so
-*.a
-*.lib
-*.out
+# # Executáveis e bibliotecas
+# *.exe
+# *.dll
+# *.so
+# *.a
+# *.lib
+# *.out
 
-# Arquivos temporários e de sistema operacional
-*~
-.DS_Store
-Thumbs.db
-desktop.ini
+# # Arquivos temporários e de sistema operacional
+# *~
+# .DS_Store
+# Thumbs.db
+# desktop.ini
 
-# Arquivos de log
-*.log
+# # Arquivos de log
+# *.log
 
 # Histórico local
 .historybuild/

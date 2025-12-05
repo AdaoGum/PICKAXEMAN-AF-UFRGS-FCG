@@ -8,6 +8,7 @@
 set(SOURCES
   src/main.cpp
   src/collisions.cpp
+  src/scene_builder.cpp
   src/textrendering.cpp
   src/glad.c
 )

@@ -61,10 +61,8 @@ void main()
     vec4 camera_position = inverse(view) * origin;
     vec4 p = position_world;
 
-    // --- CORREÇÃO MÁGICA DAS NORMAIS ---
-    // Para o labirinto (cubos), calculamos a normal real da face (Flat Shading)
-    // usando derivadas (dFdx, dFdy). Isso corrige os riscos nas paredes.
-    // Para a picareta (OBJ), usamos a normal suave original do arquivo.
+    // Calcula normal da face usando derivadas para flat shading nos cubos
+    // Para a picareta usa a normal suave do arquivo OBJ
     vec4 n;
     if (object_id == OBJ_PICKAXE)
     {
@@ -182,18 +180,14 @@ void main()
 
     if (lambert <= 0.0) specular_term = 0.0;
 
-    // Se for picareta, usa modelo de Gouraud, senão Phong
+    // Picareta usa Gouraud (por vertice), resto usa Phong (por pixel)
     if (object_id == OBJ_PICKAXE)
     {
-        // ========== MODELO DE GOURAUD ==========
-        // Iluminação foram calculados por vertice no vertex shader e INTERPOLADOS para cada pixel. Aqui aplicamos esses fatores à TEXTURA.
         vec3 Ks_pickaxe = vec3(0.3, 0.3, 0.3);
         color.rgb = (Kd * gouraud_ambient) + (Kd * gouraud_diffuse * I) + (Ks_pickaxe * gouraud_specular * I);
     }
     else
     {
-        // ========== MODELO DE PHONG ==========
-        // Iluminação calculada por pixel
         color.rgb = Ka + (Kd * lambert * I) + (Ks * specular_term * I);
     }
 

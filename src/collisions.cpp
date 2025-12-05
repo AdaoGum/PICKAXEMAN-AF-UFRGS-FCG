@@ -120,15 +120,14 @@ void CheckMapCollisionAndBreak(glm::vec4 camera_position, glm::vec4 view_vector)
     }
 }
 
-// Verifica colisão com diamante e retorna true se coletou
+// Verifica colisao com diamante
 bool CheckDiamondCollision(glm::vec4 camera_position)
 {
-    // Convertendo posição do mundo (float) para índice da matriz (int).
-    // O +0.5f é para garantir o arredondamento correto para o centro do tile
+    // Converte posicao do mundo para indice da matriz
     int player_grid_x = (int)(camera_position.x + (float)MAP_WIDTH / 2.0f + 0.5f);
     int player_grid_z = (int)(camera_position.z + (float)MAP_HEIGHT / 2.0f + 0.5f);
 
-    // Verifica se os índices são válidos para evitar acessar memória fora da matriz
+    // Verifica limites do mapa
     if (player_grid_x >= 0 && player_grid_x < MAP_WIDTH && 
         player_grid_z >= 0 && player_grid_z < MAP_HEIGHT)
     {

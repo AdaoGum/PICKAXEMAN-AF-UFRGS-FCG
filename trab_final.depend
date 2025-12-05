@@ -2425,7 +2425,7 @@
 	<stddef.h>
 	<stdint.h>
 
-1764813059 source:c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\src\main.cpp
+1764897210 source:c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\src\main.cpp
 	<cmath>
 	<cstdio>
 	<cstdlib>
@@ -2713,10 +2713,10 @@
 	<glm/vec4.hpp>
 	<glm/gtc/matrix_transform.hpp>
 
-1764798401 c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\include\collisions.h
+1764897210 c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\include\collisions.h
 	<glm/vec4.hpp>
 
-1764533812 c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\include\tiny_obj_loader.h
+1764897210 c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\include\tiny_obj_loader.h
 	<map>
 	<string>
 	<vector>
@@ -2734,7 +2734,7 @@
 	<array>
 	"mapbox/earcut.hpp"
 
-1764533812 c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\include\stb_image.h
+1764897210 c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\include\stb_image.h
 	"stb_image.h"
 	<stdio.h>
 	<stdarg.h>
@@ -2750,7 +2750,7 @@
 	<intrin.h>
 	<arm_neon.h>
 
-1764793843 c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\include\scene_builder.h
+1764897210 c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\include\scene_builder.h
 	<map>
 	<string>
 	<glad/glad.h>
@@ -3719,7 +3719,7 @@
 1764677747 source:c:\users\adaoj\onedrive\documentos\pessoal\ufrgs\pickaxeman-af-ufrgs-fcg\src\scene_builder.cpp
 	"scene_builder.h"
 
-1764793843 source:c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\src\scene_builder.cpp
+1764897210 source:c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\src\scene_builder.cpp
 	"scene_builder.h"
 
 1764814025 source:c:\users\adaojr\documents\ufrgs\fcg - fundamentos de computacao grafica\trabalho final git\pickaxeman-af-ufrgs-fcg\src\collisions.cpp
