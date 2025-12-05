@@ -1,110 +1,156 @@
-# Alterações feitas no arquivo original do Laboratório 2
+# PICKAXEMAN - Relatório Final do Trabalho
+## INF01047 - Fundamentos de Computação Gráfica - 2025/2
 
-Abaixo estão as modificações realizadas no arquivo do laboratório 2, organizadas por seções com trechos de código correspondentes.
+**Alunos:** 
+
+Adão dos Antos Júnior - 00233028
+Felipe Dal Ponte Bregalda - 
+
+**Repositório:** https://github.com/AdaoGum/PICKAXEMAN-AF-UFRGS-FCG
 
 ---
 
-## 1. Posição inicial da câmera
+## 1. Descrição do Jogo
 
-Posição inicial alterada para dentro do labirinto:
+**PICKAXEMAN** é um jogo 3D de labirinto estilo Minecraft onde o jogador deve explorar um labirinto, coletar diamantes e escapar antes que o tempo acabe. O jogador possui uma picareta que pode ser usada para destruir paredes e criar novos caminhos.
 
+### Objetivo
+- Coletar **2 diamantes** antes que os **2 minutos** de tempo acabem
+- O jogador pode destruir paredes para criar atalhos
+
+### Controles
+| Tecla | Ação |
+|-------|------|
+| W/A/S/D | Movimentação |
+| Mouse | Rotação da câmera |
+| Botão Esquerdo | Golpe de picareta |
+| V | Alternar câmera (1ª/3ª pessoa) |
+| C | Mostrar/esconder teto |
+| H | Mostrar informações de debug |
+| R | Reiniciar jogo |
+| ENTER | Iniciar jogo (tela de título) |
+
+### Mecânicas
+- **Destruição de paredes**: Primeiro golpe danifica (fica vermelha), segundo golpe destrói
+- **Sistema anti-cheat**: Se o jogador sair dos limites do mapa, tem 10 segundos para voltar
+- **Pontuação**: 50 pontos por diamante + bônus do tempo restante ao vencer
+
+---
+
+## 2. Implementação dos Requisitos Técnicos
+
+### 2.1 Malhas Poligonais Complexas ✅
+
+O jogo utiliza **3 tipos de malhas poligonais**:
+
+| Objeto | Origem | Arquivo |
+|--------|--------|---------|
+| **Cubo** | Gerado proceduralmente | `src/scene_builder.cpp` |
+| **Picareta** | Modelo OBJ externo | `data/obj/pickaxe.obj` |
+| **Diamante** | Modelo OBJ externo | `data/obj/diamond.obj` |
+
+**Implementação:**
+- O cubo é construído em `BuildTriangles()` com 8 vértices e 12 triângulos (linhas 21-59 de `scene_builder.cpp`)
+- Os modelos OBJ são carregados usando **TinyObjLoader** (linhas 601-613 de `main.cpp`):
 ```cpp
-glm::vec4 g_CameraPosition     = glm::vec4(-4.0f, 0.0f, -4.0f, 1.0f); // Posição inicial da câmera
-glm::vec4 g_CameraViewVector   = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f); // Vetor "view", para onde a câmera está virada
-glm::vec4 g_CameraUpVector     = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f); // Vetor "up"
+ObjModel pickaxeModel("../../data/obj/pickaxe.obj");
+ComputeNormals(&pickaxeModel);
+BuildTrianglesAndAddToVirtualScene(&pickaxeModel);
+
+ObjModel diamondModel("../../data/obj/diamond.obj");
+ComputeNormals(&diamondModel);
+BuildTrianglesAndAddToVirtualScene(&diamondModel);
 ```
 
 ---
 
-## 2. Definição do mapa do labirinto
+### 2.2 Transformações Geométricas ✅
 
-Mapa definido como uma matriz 10x10, onde 0 = espaço vazio e 1 = parede:
+Utilizamos as **5 matrizes de transformação** implementadas em `include/matrices.h`:
 
+| Matriz | Função | Uso no Jogo |
+|--------|--------|-------------|
+| `Matrix_Identity()` | Matriz identidade | Base para transformações |
+| `Matrix_Translate(tx, ty, tz)` | Translação | Posicionar paredes, diamantes, picareta |
+| `Matrix_Scale(sx, sy, sz)` | Escala | Ajustar tamanho dos diamantes (0.3x) |
+| `Matrix_Rotate_X/Y/Z(angle)` | Rotação | Animação da picareta, rotação dos diamantes |
+
+**Exemplo - Renderização do diamante (main.cpp, ~linha 1000):**
 ```cpp
-// 0 = espaço vazio, 1 = parede 
-const int map_width = 10;
-const int map_height = 10;
-int maze_map[map_height][map_width] = {
-    {1,1,1,1,1,1,1,1,1,1},
-    {1,0,0,0,0,0,0,0,0,1},
-    {1,0,1,1,0,1,1,1,0,1},
-    {1,0,1,0,0,0,1,0,0,1},
-    {1,0,1,0,1,0,1,0,1,1},
-    {1,0,0,0,1,0,0,0,0,1},
-    {1,1,1,1,1,0,1,1,0,1},
-    {1,0,0,0,0,0,0,1,0,1},
-    {1,0,1,1,1,1,0,0,0,1},
-    {1,1,1,1,1,1,1,1,1,1}
-};
+model = Matrix_Translate(world_x, 0.3f, world_z) 
+      * Matrix_Scale(0.3f, 0.3f, 0.3f) 
+      * Matrix_Rotate_Y(diamond_rotation);
+```
+
+**Exemplo - Picareta com animação (main.cpp, ~linha 1240):**
+```cpp
+model = Matrix_Translate(0.5f, -0.5f, -1.0f)
+      * animation_rotation  // Vem da curva de Bézier
+      * Matrix_Rotate_Y(glm::radians(180.0f))
+      * Matrix_Rotate_X(glm::radians(270.0f))
+      * Matrix_Rotate_Z(glm::radians(180.0f))
+      * Matrix_Scale(1.0f, 1.0f, 1.0f);
 ```
 
 ---
 
-## 3. Desenha o chão
+### 2.3 Controle de Câmeras ✅
 
-Trecho responsável pelo desenho do objeto "floor":
+O jogo implementa **duas câmeras distintas** controladas pela variável `g_UseFreeCamera`:
 
+#### Câmera Livre (1ª Pessoa - FPS)
+- **Arquivo:** `main.cpp`, linhas 912-919
+- Posição acompanha o jogador (`g_CameraPosition`)
+- Direção controlada por ângulos Yaw/Pitch via mouse
+- Implementação:
 ```cpp
-{
-    glm::mat4 model = Matrix_Identity();
-    the_model = model; // Salva para o texto
+if (g_UseFreeCamera) {
+    glm::vec4 camera_eye = g_CameraPosition + glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    view = Matrix_Camera_View(camera_eye, g_CameraViewVector, g_CameraUpVector);
+}
+```
 
-    glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-    glUniform1i(render_as_black_uniform, false);
-
-    glDrawElements(
-        g_VirtualScene["floor"].rendering_mode,
-        g_VirtualScene["floor"].num_indices,
-        GL_UNSIGNED_INT,
-        (void*)g_VirtualScene["floor"].first_index
-    );
+#### Câmera Look-At (3ª Pessoa)
+- **Arquivo:** `main.cpp`, linhas 922-938
+- Usa coordenadas esféricas para orbitar ao redor do jogador
+- Distância ajustável via scroll do mouse (`g_CameraDistance`)
+- Implementação:
+```cpp
+else {
+    float r = g_CameraDistance;
+    float y = r * sin(g_CameraPhi);
+    float z = r * cos(g_CameraPhi) * cos(g_CameraTheta);
+    float x = r * cos(g_CameraPhi) * sin(g_CameraTheta);
+    
+    glm::vec4 camera_lookat_point = g_CameraPosition + glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+    glm::vec4 camera_view_point = camera_lookat_point + glm::vec4(x, y, z, 0.0f);
+    glm::vec4 view_vector = camera_lookat_point - camera_view_point;
+    
+    view = Matrix_Camera_View(camera_view_point, view_vector, g_CameraUpVector);
 }
 ```
 
 ---
 
-## 4. Desenha o labirinto com base no `maze_map`
+### 2.4 Instâncias de Objetos ✅
 
-Loop que percorre o mapa e desenha cubos onde há paredes (valor 1):
+Utilizamos **instanciação** para renderizar múltiplos objetos com a mesma geometria:
 
+- **Paredes**: O mesmo VAO do cubo é renderizado ~200 vezes com diferentes matrizes Model
+- **Diamantes**: 7 instâncias do mesmo modelo OBJ em posições diferentes
+
+**Implementação (main.cpp, linhas 1030-1080):**
 ```cpp
-// (Substitui o loop for (int i = 1; i <= 3; ++i))
-for (int z = 0; z < map_height; ++z)
-{
-    for (int x = 0; x < map_width; ++x)
-    {
-        // Se for uma parede (1)
-        if (maze_map[z][x] == 1)
-        {
-            // Os cubos têm 1x1x1, e eles vão de -0.5 até 0.5                             
-            // Calcula a posição no mundo, centrando o labirinto em (0,0)
-
-            float pos_x = (float)x - (float)map_width / 2.0f;
-            float pos_z = (float)z - (float)map_height / 2.0f;
-
-            glm::mat4 model = Matrix_Translate(pos_x, 0.0f, pos_z);
-
-            // Envia a matriz "model" para a placa de vídeo (GPU).
+// Desenha todas as paredes do labirinto
+for (int z = 0; z < MAP_HEIGHT; ++z) {
+    for (int x = 0; x < MAP_WIDTH; ++x) {
+        if (maze_map[z][x] == WALL || maze_map[z][x] == DAMAGED_WALL) {
+            float world_x = (float)x - (float)MAP_WIDTH / 2.0f;
+            float world_z = (float)z - (float)MAP_HEIGHT / 2.0f;
+            
+            model = Matrix_Translate(world_x, 0.0f, world_z);
             glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-
-            // Desenha as faces coloridas
-            glUniform1i(render_as_black_uniform, false);
-            glDrawElements(
-                g_VirtualScene["cube_faces"].rendering_mode,
-                g_VirtualScene["cube_faces"].num_indices,
-                GL_UNSIGNED_INT,
-                (void*)g_VirtualScene["cube_faces"].first_index
-            );
-
-            // Desenha as arestas pretas
-            glLineWidth(4.0f);
-            glUniform1i(render_as_black_uniform, true);
-            glDrawElements(
-                g_VirtualScene["cube_edges"].rendering_mode,
-                g_VirtualScene["cube_edges"].num_indices,
-                GL_UNSIGNED_INT,
-                (void*)g_VirtualScene["cube_edges"].first_index
-            );
+            glDrawElements(...); // Mesmo VAO, matriz Model diferente
         }
     }
 }
@@ -112,216 +158,305 @@ for (int z = 0; z < map_height; ++z)
 
 ---
 
-## 5. Desenha a picareta (HUD / item em frente à câmera)
+### 2.5 Testes de Intersecção ✅
 
-A picareta é desenhada usando uma View identidade e garantindo que ela apareça sempre à frente (limpando o Z-buffer). O código desenha separadamente o cabo e a cabeça com suas transformações:
+Implementamos **3 tipos de teste de colisão** em `src/collisions.cpp`:
 
+#### 1. Colisão Jogador-Parede (Ponto-Cubo)
+- **Função:** `CheckCollision(float x, float z)`
+- Verifica 4 pontos ao redor do jogador (raio de colisão = 0.2)
+- Impede atravessar paredes
 ```cpp
-{
-    // Limpa o Z-buffer para garantir que a picareta sempre apareça na frente
-    glClear(GL_DEPTH_BUFFER_BIT);
+bool CheckCollision(float x, float z) {
+    float collision_radius = 0.2f;
+    float check_points[4][2] = {
+        { x + collision_radius, z },
+        { x - collision_radius, z },
+        { x, z + collision_radius },
+        { x, z - collision_radius }
+    };
+    // Verifica cada ponto contra o mapa
+}
+```
 
-    // Usamos uma matriz View identidade para desenhar em "Camera Space"
-    glm::mat4 pickaxe_view = Matrix_Identity();
-    glUniformMatrix4fv(view_uniform, 1, GL_FALSE, glm::value_ptr(pickaxe_view));
+#### 2. Colisão Jogador-Diamante (Ponto-Célula)
+- **Função:** `CheckDiamondCollision(glm::vec4 camera_position)`
+- Verifica se o jogador está na mesma célula do mapa que um diamante
+- Remove diamante ao coletar
 
-    // Modelo do Cabo da Picareta
-    glm::mat4 handle_model = Matrix_Translate(0.4f, -0.3f, -1.0f) // Posição na tela
-                           * Matrix_Rotate_Z(glm::radians(-30.0f)) // Rotação
-                           * Matrix_Scale(0.08f, 0.6f, 0.08f);    // Tamanho (fino e longo)
+#### 3. Colisão Picareta-Parede (Raio-Célula)
+- **Função:** `CheckMapCollisionAndBreak(glm::vec4 camera_position, glm::vec4 view_vector)`
+- Projeta um raio na direção que o jogador olha
+- Alcance de 1.5 unidades
+- Detecta e danifica/destrói parede à frente
+
+---
+
+### 2.6 Modelos de Iluminação ✅
+
+Implementamos o modelo **Blinn-Phong** com 3 componentes em `shader_fragment.glsl`:
+
+#### Componente Ambiente
+```glsl
+vec3 Ka = Kd * 0.5;  // 50% da cor difusa
+```
+
+#### Componente Difusa (Lambert)
+```glsl
+float lambert = max(0, dot(n, l));
+```
+
+#### Componente Especular (Blinn-Phong)
+```glsl
+vec4 h = normalize(l + v);  // Half-vector
+float specular_term = pow(max(0, dot(n, h)), q);
+if (lambert <= 0.0) specular_term = 0.0;  // Sem especular em sombra
+```
+
+**Configuração por objeto:**
+| Objeto | Ks (especular) | q (expoente) |
+|--------|----------------|--------------|
+| Paredes/Chão/Teto | 0.1 | 10 |
+| Diamante | 0.5 | 10 |
+| Picareta | 0.3 | 20 |
+
+---
+
+### 2.7 Modelos de Interpolação ✅
+
+Implementamos **dois modelos de interpolação** para demonstrar a diferença:
+
+#### Interpolação de Phong (Por Pixel)
+- **Usado em:** Paredes, Chão, Teto, Diamante
+- **Arquivo:** `shader_fragment.glsl`, linhas 170-198
+- Iluminação calculada no **Fragment Shader** para cada pixel
+```glsl
+// MODELO DE PHONG - Iluminação calculada por pixel
+color.rgb = Ka + (Kd * lambert * I) + (Ks * specular_term * I);
+```
+
+#### Interpolação de Gouraud (Por Vértice)
+- **Usado em:** **Picareta** (objeto com muitos vértices para visualizar a diferença)
+- **Arquivo:** `shader_vertex.glsl`, linhas 47-77
+- Iluminação calculada no **Vertex Shader** e interpolada
+
+**Vertex Shader (cálculo por vértice):**
+```glsl
+if (object_id == OBJ_PICKAXE) {
+    gouraud_ambient = 0.4;
+    gouraud_diffuse = max(0.0, dot(n, l));
     
-    glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(handle_model));
-    
-    // Desenha faces do cabo
-    glUniform1i(render_as_black_uniform, false);
-    glDrawElements(
-        g_VirtualScene["cube_faces"].rendering_mode,
-        g_VirtualScene["cube_faces"].num_indices,
-        GL_UNSIGNED_INT,
-        (void*)g_VirtualScene["cube_faces"].first_index
-    );
-    // Desenha arestas do cabo
-    glUniform1i(render_as_black_uniform, true);
-    glDrawElements(
-        g_VirtualScene["cube_edges"].rendering_mode,
-        g_VirtualScene["cube_edges"].num_indices,
-        GL_UNSIGNED_INT,
-        (void*)g_VirtualScene["cube_edges"].first_index
-    );
+    vec4 h = normalize(l + v);
+    gouraud_specular = pow(max(0.0, dot(n, h)), 20.0);
+}
+```
 
-    // Modelo da Cabeça da Picareta
-    glm::mat4 head_model = Matrix_Translate(0.4f, -0.3f, -1.0f)      // Mesma Posição
-                         * Matrix_Rotate_Z(glm::radians(-30.0f))    // Mesma Rotação
-                         * Matrix_Translate(0.0f, 0.25f, 0.0f)      // Desloca para a ponta do cabo
-                         * Matrix_Scale(0.3f, 0.08f, 0.08f);       // Tamanho (largo e fino)
-
-    glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(head_model));
-    
-    // Desenha faces da cabeça
-    glUniform1i(render_as_black_uniform, false);
-    glDrawElements(
-        g_VirtualScene["cube_faces"].rendering_mode,
-        g_VirtualScene["cube_faces"].num_indices,
-        GL_UNSIGNED_INT,
-        (void*)g_VirtualScene["cube_faces"].first_index
-    );
-    // Desenha arestas da cabeça
-    glUniform1i(render_as_black_uniform, true);
-    glDrawElements(
-        g_VirtualScene["cube_edges"].rendering_mode,
-        g_VirtualScene["cube_edges"].num_indices,
-        GL_UNSIGNED_INT,
-        (void*)g_VirtualScene["cube_edges"].first_index
-    );
+**Fragment Shader (aplicação dos valores interpolados):**
+```glsl
+if (object_id == OBJ_PICKAXE) {
+    // GOURAUD: Usa fatores calculados por vértice e interpolados
+    color.rgb = (Kd * gouraud_ambient) + (Kd * gouraud_diffuse * I) + (Ks * gouraud_specular * I);
 }
 ```
 
 ---
 
-## 6. Vértices para o chão (y = -0.5)
+### 2.8 Mapeamento de Texturas ✅
 
-Vertices do chão (coordenadas X, Y, Z, W):
+Implementamos **6 texturas** com diferentes técnicas de mapeamento:
 
-```text
-//    X      Y     Z     W
--50.0f, -0.5f, -50.0f, 1.0f, // vértice 14
- 50.0f, -0.5f, -50.0f, 1.0f, // vértice 15
- 50.0f, -0.5f,  50.0f, 1.0f, // vértice 16
--50.0f, -0.5f,  50.0f, 1.0f  // vértice 17
+| Objeto | Textura | Técnica de Mapeamento |
+|--------|---------|----------------------|
+| Paredes | 425.jpg | **Triplanar Simplificado** |
+| Chão | gravelstones.jpg | Planar (XZ) com tiling 4x |
+| Teto | grayrocks.jpg | Planar (XZ) com tiling 4x |
+| Picareta | wood.jpg | Coordenadas UV do OBJ |
+| Diamante | diamond_obj.png | **Triplanar Completo** |
+| Tela Título | title_screen.png | UV direto |
+
+#### Mapeamento Triplanar Simplificado (Paredes)
+Escolhe a melhor projeção baseado na normal da face:
+```glsl
+vec3 absN = abs(n.xyz);
+if (absN.x > absN.y && absN.x > absN.z) {
+    U = position_world.z; V = position_world.y;  // Paredes laterais
+} else if (absN.y > absN.x && absN.y > absN.z) {
+    U = position_world.x; V = position_world.z;  // Topo/Baixo
+} else {
+    U = position_world.x; V = position_world.y;  // Frente/Trás
+}
+```
+
+#### Mapeamento Triplanar Completo (Diamante)
+Mistura 3 projeções baseado na normal para transições suaves:
+```glsl
+vec3 blending = abs(n.xyz);
+blending = normalize(max(blending, 0.00001));
+blending /= (blending.x + blending.y + blending.z);
+
+vec3 xaxis = texture(TextureImage4, position_model.yz * tiling).rgb;
+vec3 yaxis = texture(TextureImage4, position_model.xz * tiling).rgb;
+vec3 zaxis = texture(TextureImage4, position_model.xy * tiling).rgb;
+
+Kd = xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
 ```
 
 ---
 
-## 7. Cores para o chão (verde)
+### 2.9 Curvas de Bézier ✅
 
-Cores RGBA atribuídas aos vértices do chão:
+A animação da picareta utiliza uma **Curva de Bézier Cúbica** para movimento suave.
 
-```text
-0.3f, 0.7f, 0.2f, 1.0f, // cor do vértice 14
-0.3f, 0.7f, 0.2f, 1.0f, // cor do vértice 15
-0.3f, 0.7f, 0.2f, 1.0f, // cor do vértice 16
-0.3f, 0.7f, 0.2f, 1.0f  // cor do vértice 17
-```
+**Arquivo:** `main.cpp`, linhas 405-423
 
----
-
-## 8. Índices das faces do chão
-
-Índices que formam os dois triângulos do chão:
-
-```text
-14, 15, 16, // triângulo 1 (chão)
-14, 16, 17, // triângulo 2 (chão)
-```
-
----
-
-## 9. Criação do objeto do chão na cena
-
-Objeto `SceneObject` criado para o chão, com ajustes no primeiro índice e número de índices:
+#### Fórmula Implementada
+$$c(t) = (1-t)^3 P_0 + 3t(1-t)^2 P_1 + 3t^2(1-t) P_2 + t^3 P_3$$
 
 ```cpp
-SceneObject floor_faces;
-floor_faces.name           = "Chão";
-floor_faces.first_index    = (void*)(36*sizeof(GLuint)); // Começa depois das faces do cubo (índice 36)
-floor_faces.num_indices    = 6; // 2 triângulos = 6 índices
-floor_faces.rendering_mode = GL_TRIANGLES;
-g_VirtualScene["floor"] = floor_faces;
+glm::vec3 BezierCubic(float t, glm::vec3 P0, glm::vec3 P1, glm::vec3 P2, glm::vec3 P3) {
+    glm::vec3 point = (1.0f - t) * (1.0f - t) * (1.0f - t) * P0;
+    point += 3.0f * t * (1.0f - t) * (1.0f - t) * P1;
+    point += 3.0f * t * t * (1.0f - t) * P2;
+    point += t * t * t * P3;
+    return point;
+}
 ```
+
+#### Pontos de Controle
+```cpp
+const glm::vec3 g_BezierP0 = glm::vec3(0.0f, 0.0f, 0.0f);      // Repouso
+const glm::vec3 g_BezierP1 = glm::vec3(-30.0f, 10.0f, 0.1f);   // Levanta e puxa
+const glm::vec3 g_BezierP2 = glm::vec3(-70.0f, -5.0f, -0.1f);  // Prepara golpe
+const glm::vec3 g_BezierP3 = glm::vec3(-90.0f, 0.0f, -0.2f);   // Golpe final
+```
+
+A animação usa os valores retornados como:
+- `bezier_anim.x` → Rotação em X (swing principal)
+- `bezier_anim.y` → Rotação em Y (movimento lateral)
+- `bezier_anim.z` → Deslocamento em Z (avança/recua)
 
 ---
 
-## 10. Atualização dos índices iniciais (offsets)
+### 2.10 Animação Baseada em Tempo ✅
 
-Ajustes nos offsets dos índices para que as arestas e os eixos comecem após os blocos já definidos:
+Toda movimentação e animação é **independente de framerate** usando Delta Time.
+
+**Arquivo:** `main.cpp`, linhas 750-755
 
 ```cpp
-cube_edges.first_index    = (void*)((36+6)*sizeof(GLuint)); // Começa em indices[42]
-axes.first_index          = (void*)((36+6+24)*sizeof(GLuint)); // Começa em indices[66]
+// Cálculo do Delta Time
+float currentFrameTime = (float)glfwGetTime();
+g_DeltaTime = currentFrameTime - g_LastFrameTime;
+g_LastFrameTime = currentFrameTime;
 ```
 
----
+#### Aplicações:
 
-## 11. Atualiza ao não pressionar o botão esquerdo
-
-Atualização da posição do cursor quando o botão esquerdo não está pressionado:
-
+**Movimento do jogador:**
 ```cpp
-glfwGetCursorPos(window, &g_LastCursorPosX, &g_LastCursorPosY);
-return;
+float move_speed = 4.0f * g_DeltaTime;  // 4 unidades por segundo
+```
+
+**Animação da picareta:**
+```cpp
+float swing_speed = 3.0f;
+g_SwingAnimationTime += swing_speed * g_DeltaTime;
+```
+
+**Rotação dos diamantes:**
+```cpp
+float diamond_rotation = (float)glfwGetTime() * 1.0f;  // 1 rad/s
 ```
 
 ---
 
-## 12. Movimento da Picareta
+## 3. Estrutura do Projeto
 
-Agora vamos fazer a picareta se mexer
-
- Variáveis para animação da picareta
- 
- ```cpp
-bool g_IsSwinging = false;         // Controla se a animação está ativa
-float g_SwingAnimationTime = 0.0f; // Controla o progresso da animação (em radianos)
-
-float g_DeltaTime = 0.0f;
-float g_LastFrameTime = 0.0f;
-
-Apertar o botão de animação da picareta
-    if (key == GLFW_KEY_Q && action == GLFW_PRESS)
-    {
-        // Só começa uma nova animação se não houver uma em andamento
-        if (!g_IsSwinging)
-        {
-            g_IsSwinging = true;
-            g_SwingAnimationTime = 0.0f; // Reseta o tempo da animação
-        }
-    }
+```
+PICKAXEMAN-AF-UFRGS-FCG/
+├── src/
+│   ├── main.cpp              # Loop principal, renderização, câmeras, input
+│   ├── shader_vertex.glsl    # Vertex shader (transformações, Gouraud)
+│   ├── shader_fragment.glsl  # Fragment shader (Phong, texturas, triplanar)
+│   ├── collisions.cpp        # Sistema de colisão e mapa do labirinto
+│   ├── scene_builder.cpp     # Construção de geometria (cubo, chão, teto)
+│   └── textrendering.cpp     # Renderização de texto na tela
+├── include/
+│   ├── matrices.h            # Matrizes de transformação (Translate, Scale, Rotate)
+│   ├── collisions.h          # Declarações do sistema de colisão
+│   ├── scene_builder.h       # Declarações do construtor de cena
+│   ├── tiny_obj_loader.h     # Biblioteca para carregar OBJ
+│   └── stb_image.h           # Biblioteca para carregar texturas
+├── data/
+│   ├── obj/                  # Modelos 3D
+│   │   ├── pickaxe.obj       # Picareta
+│   │   └── diamond.obj       # Diamante
+│   └── textures/             # Texturas
+│       ├── 425.jpg           # Paredes
+│       ├── gravelstones.jpg  # Chão
+│       ├── grayrocks.jpg     # Teto
+│       ├── wood.jpg          # Picareta
+│       ├── diamond_obj.png   # Diamante
+│       └── title_screen.png  # Tela de título
+└── build/                    # Arquivos de compilação (CMake)
 ```
 
+---
 
-Inicializa o timer da animação antes do loop
+## 4. Compilação e Execução
 
- ```cpp
-g_LastFrameTime = (float)glfwGetTime();
+### Requisitos
+- CMake 3.10+
+- Compilador C++ com suporte a C++11
+- OpenGL 3.3+
+
+### Windows (MinGW)
+```bash
+cd build
+cmake ..
+cmake --build . --config Release
+cd ../bin/Release
+./main.exe
 ```
 
-
-Cálculo da animação e movimento da animação
-
- ```cpp
-      float currentFrameTime = (float)glfwGetTime();
-        g_DeltaTime = currentFrameTime - g_LastFrameTime;
-        g_LastFrameTime = currentFrameTime;
-
-        // Atualização da Animação
-        if (g_IsSwinging)
-        {
-            float swing_speed = 10.0f; // Velocidade da animação (radianos/seg)
-            g_SwingAnimationTime += swing_speed * g_DeltaTime;
-
-            // Usamos PI porque a função sin(x) de 0 a PI (0 -> 1 -> 0).
-            if (g_SwingAnimationTime >= 3.141592f)
-            {
-                g_IsSwinging = false;
-                g_SwingAnimationTime = 0.0f;
-            }
-        }
- ```
-
-Usamos g_DeltaTime para velocidade constante
-
- ```cpp
-float camera_speed = 4.0f * g_DeltaTime; // 4.0 unidades por segundo
-
-Cálculo da rotação da animação
-            float swing_angle_rad = 0.0f;
-            if (g_IsSwinging)
-            {
-                float max_swing_angle = glm::radians(45.0f);
-                swing_angle_rad = sin(g_SwingAnimationTime) * max_swing_angle;
-            }
-            // Criamos uma matriz de rotação para a animação (em torno do eixo X)
-            glm::mat4 animation_rotation = Matrix_Rotate_X(swing_angle_rad);
+### Linux
+```bash
+cd build
+cmake ..
+make
+cd ../bin/Linux
+./main
 ```
 
-Multiplicamos nos modelos da cabeça e do cabo da picareta
+---
+
+## 5. Contribuições
+
+| Contribuições | Membro |
+|------------------|--------------|
+| Malhas poligonais complexas | Adão + Felipe |
+| Transformações geométricas controladas pelo usuário | Felipe |
+| Câmera livre e câmera look-at | Felipe |
+| Instâncias de objetos | Adão + Felipe |
+| Três tipos de testes de intersecção | Adão + Felipe |
+| Modelos de Iluminação Difusa e Blinn-Phong | Adão + Felipe |
+| Modelos de Interpolação de Phong e Gouraud | Adão |
+| Mapeamento de texturas em todos os objetos | Adão + Felipe |
+| Movimentação com curva Bézier cúbica | Adão |
+| Animações baseadas no tempo (Δt) | Adão + Felipe |
+
+---
+
+## 6. Uso de IA Generativa
+
+Utilizamos o GitHub Copilot e o Gemini para auxiliar em dúvidas no geral, debbugar e na estrutura de arquivos, algumas partes das colisões, na correção de bugs no mapeamento de texturas e A IA foi útil para explicar conceitos e sugerir soluções, mas todo o código foi revisado e adaptado para o contexto do projeto.
+
+---
+
+## 7. Referências
+
+- Laboratórios da disciplina INF01047
+- OpenGL Programming Guide
+- Learn OpenGL (https://learnopengl.com)
+- TinyObjLoader (https://github.com/tinyobjloader/tinyobjloader)
+- STB Image (https://github.com/nothings/stb)
