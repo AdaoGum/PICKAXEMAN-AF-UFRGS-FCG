@@ -365,7 +365,9 @@ float g_AngleZ = 0.0f;
 bool g_LeftMouseButtonPressed = false;
 
 bool g_UseFreeCamera = true;
-bool g_ShowCeiling = true; // Controla visibilidade do teto
+
+// Controla visibilidade do teto
+bool g_ShowCeiling = true;
 
 // Variáveis que definem a câmera em coordenadas esféricas, controladas pelo
 // usuário através do mouse (veja função CursorPosCallback()). A posição
@@ -502,7 +504,6 @@ void ResetGame()
     g_SwingAnimationTime = 0.0f;
 
     // Variável que controla o tipo de projeção utilizada: perspectiva ou ortográfica.
-    //TODO: verificar uso
     bool g_UsePerspectiveProjection = true;
 
     // Reseta teclas pressionadas
