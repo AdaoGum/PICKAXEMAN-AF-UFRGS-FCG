@@ -1,32 +1,32 @@
 [
 {
-  "directory": "C:/Users/AdaoJr/Documents/UFRGS/FCG - Fundamentos de Computacao Grafica/trabalho final git/PICKAXEMAN-AF-UFRGS-FCG/build",
-  "command": "C:\\PROGRA~1\\CODEBL~1\\MinGW\\bin\\G__~1.EXE  @CMakeFiles/main.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++11 -o CMakeFiles\\main.dir\\src\\main.cpp.obj -c \"C:\\Users\\AdaoJr\\Documents\\UFRGS\\FCG - Fundamentos de Computacao Grafica\\trabalho final git\\PICKAXEMAN-AF-UFRGS-FCG\\src\\main.cpp\"",
-  "file": "C:/Users/AdaoJr/Documents/UFRGS/FCG - Fundamentos de Computacao Grafica/trabalho final git/PICKAXEMAN-AF-UFRGS-FCG/src/main.cpp",
-  "output": "CMakeFiles/main.dir/src/main.cpp.obj"
+  "directory": "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/build",
+  "command": "/usr/bin/g++  -I/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/include -g -std=c++11 -Wall -Wno-unused-function -o CMakeFiles/main.dir/src/main.cpp.o -c /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/main.cpp",
+  "file": "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/main.cpp",
+  "output": "CMakeFiles/main.dir/src/main.cpp.o"
 },
 {
-  "directory": "C:/Users/AdaoJr/Documents/UFRGS/FCG - Fundamentos de Computacao Grafica/trabalho final git/PICKAXEMAN-AF-UFRGS-FCG/build",
-  "command": "C:\\PROGRA~1\\CODEBL~1\\MinGW\\bin\\G__~1.EXE  @CMakeFiles/main.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++11 -o CMakeFiles\\main.dir\\src\\collisions.cpp.obj -c \"C:\\Users\\AdaoJr\\Documents\\UFRGS\\FCG - Fundamentos de Computacao Grafica\\trabalho final git\\PICKAXEMAN-AF-UFRGS-FCG\\src\\collisions.cpp\"",
-  "file": "C:/Users/AdaoJr/Documents/UFRGS/FCG - Fundamentos de Computacao Grafica/trabalho final git/PICKAXEMAN-AF-UFRGS-FCG/src/collisions.cpp",
-  "output": "CMakeFiles/main.dir/src/collisions.cpp.obj"
+  "directory": "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/build",
+  "command": "/usr/bin/g++  -I/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/include -g -std=c++11 -Wall -Wno-unused-function -o CMakeFiles/main.dir/src/collisions.cpp.o -c /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/collisions.cpp",
+  "file": "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/collisions.cpp",
+  "output": "CMakeFiles/main.dir/src/collisions.cpp.o"
 },
 {
-  "directory": "C:/Users/AdaoJr/Documents/UFRGS/FCG - Fundamentos de Computacao Grafica/trabalho final git/PICKAXEMAN-AF-UFRGS-FCG/build",
-  "command": "C:\\PROGRA~1\\CODEBL~1\\MinGW\\bin\\G__~1.EXE  @CMakeFiles/main.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++11 -o CMakeFiles\\main.dir\\src\\scene_builder.cpp.obj -c \"C:\\Users\\AdaoJr\\Documents\\UFRGS\\FCG - Fundamentos de Computacao Grafica\\trabalho final git\\PICKAXEMAN-AF-UFRGS-FCG\\src\\scene_builder.cpp\"",
-  "file": "C:/Users/AdaoJr/Documents/UFRGS/FCG - Fundamentos de Computacao Grafica/trabalho final git/PICKAXEMAN-AF-UFRGS-FCG/src/scene_builder.cpp",
-  "output": "CMakeFiles/main.dir/src/scene_builder.cpp.obj"
+  "directory": "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/build",
+  "command": "/usr/bin/g++  -I/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/include -g -std=c++11 -Wall -Wno-unused-function -o CMakeFiles/main.dir/src/scene_builder.cpp.o -c /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/scene_builder.cpp",
+  "file": "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/scene_builder.cpp",
+  "output": "CMakeFiles/main.dir/src/scene_builder.cpp.o"
 },
 {
-  "directory": "C:/Users/AdaoJr/Documents/UFRGS/FCG - Fundamentos de Computacao Grafica/trabalho final git/PICKAXEMAN-AF-UFRGS-FCG/build",
-  "command": "C:\\PROGRA~1\\CODEBL~1\\MinGW\\bin\\G__~1.EXE  @CMakeFiles/main.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++11 -o CMakeFiles\\main.dir\\src\\textrendering.cpp.obj -c \"C:\\Users\\AdaoJr\\Documents\\UFRGS\\FCG - Fundamentos de Computacao Grafica\\trabalho final git\\PICKAXEMAN-AF-UFRGS-FCG\\src\\textrendering.cpp\"",
-  "file": "C:/Users/AdaoJr/Documents/UFRGS/FCG - Fundamentos de Computacao Grafica/trabalho final git/PICKAXEMAN-AF-UFRGS-FCG/src/textrendering.cpp",
-  "output": "CMakeFiles/main.dir/src/textrendering.cpp.obj"
+  "directory": "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/build",
+  "command": "/usr/bin/g++  -I/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/include -g -std=c++11 -Wall -Wno-unused-function -o CMakeFiles/main.dir/src/textrendering.cpp.o -c /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/textrendering.cpp",
+  "file": "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/textrendering.cpp",
+  "output": "CMakeFiles/main.dir/src/textrendering.cpp.o"
 },
 {
-  "directory": "C:/Users/AdaoJr/Documents/UFRGS/FCG - Fundamentos de Computacao Grafica/trabalho final git/PICKAXEMAN-AF-UFRGS-FCG/build",
-  "command": "C:\\PROGRA~1\\CODEBL~1\\MinGW\\bin\\gcc.exe  @CMakeFiles/main.dir/includes_C.rsp -O3 -DNDEBUG -o CMakeFiles\\main.dir\\src\\glad.c.obj -c \"C:\\Users\\AdaoJr\\Documents\\UFRGS\\FCG - Fundamentos de Computacao Grafica\\trabalho final git\\PICKAXEMAN-AF-UFRGS-FCG\\src\\glad.c\"",
-  "file": "C:/Users/AdaoJr/Documents/UFRGS/FCG - Fundamentos de Computacao Grafica/trabalho final git/PICKAXEMAN-AF-UFRGS-FCG/src/glad.c",
-  "output": "CMakeFiles/main.dir/src/glad.c.obj"
+  "directory": "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/build",
+  "command": "/usr/bin/gcc  -I/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/include -g -Wall -Wno-unused-function -o CMakeFiles/main.dir/src/glad.c.o -c /home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/glad.c",
+  "file": "/home/bregalda/Desktop/bregalda/Diversos/BregaldaFiles/ufrgs/fundamentos_de_computacao_grafica/PICKAXEMAN-AF-UFRGS-FCG/src/glad.c",
+  "output": "CMakeFiles/main.dir/src/glad.c.o"
 }
 ]
